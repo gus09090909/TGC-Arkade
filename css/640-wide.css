@@ -18,18 +18,12 @@
 /*#space #a-game-canvases {
     padding-top: 89px;
 }
-#pegasus #a-game-canvases {
-    padding-top: 89px;
 }*/
 #a-game-dashboard {
     top: 14px;
     left: -51px;
     width: 208px;
 }
-#pegasus #a-game-dashboard {
-    top: 285px !important;
-}
-
 .lbx-window {
     width: 570px !important;
 }

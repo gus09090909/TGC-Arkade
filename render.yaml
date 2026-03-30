@@ -1,0 +1,12 @@
+# Deploy on https://render.com — New Web Service, connect this repo.
+# Build installs deps, bower libs, and grunt bundle; start runs the game + API on one URL.
+services:
+  - type: web
+    name: tgc-arkade
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx bower install --allow-root && npx grunt build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "18"

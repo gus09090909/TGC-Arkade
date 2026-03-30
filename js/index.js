@@ -45,27 +45,42 @@
                     }
                 }
                 i18.setLanguage(app.gameOptions.get('window-options:lang'));
-                app.preloader.showIndicator();
 
-                if ( core.storageGlobal.get('level') ) {
-                    options.customLevel = core.storageGlobal.get('level');
-                }
-                new app.Game(options);
+                require(['app/tgc-welcome', 'app/tgc-profile', 'app/tgc-achievements', 'app/levels', 'app/tgc-cloud'], function(tgcWelcome, tgcProfile, tgcAchievements, levels, tgcCloud) {
+                    if ( !tgcCloud.enabled() ) {
+                        tgcWelcome.ensureUsername();
+                        return;
+                    }
+                    tgcWelcome.ensureUsername(function() {
+                        var ctx = {levelCount: levels.getLevelsLength()};
+                        tgcAchievements.evaluate(tgcProfile.get(), ctx, function(def) {
+                            tgcAchievements.notifyUnlock(def);
+                        });
+                        tgcProfile.persist();
+                        tgcProfile.schedulePush();
 
-                if ( !app.gameOptions.get('window-options:cookieInfo') ) {
-                    $([
-                        '<div id="cookie">',
-                            i18._(isChromeApp ? 'usage-data-info' : 'cookie-info'),
-                        '</div>'
-                    ].join('')).appendTo(document.body).find('.btn').on('click', function(event) {
-                        event.preventDefault();
+                        app.preloader.showIndicator();
 
-                        app.gameOptions.set('window-options', {cookieInfo: true});
-                        $(event.target).parents('#cookie').remove();
+                        if ( core.storageGlobal.get('level') ) {
+                            options.customLevel = core.storageGlobal.get('level');
+                        }
+                        new app.Game(options);
+
+                        if ( !app.gameOptions.get('window-options:cookieInfo') ) {
+                            $([
+                                '<div id="cookie">',
+                                    i18._(isChromeApp ? 'usage-data-info' : 'cookie-info'),
+                                '</div>'
+                            ].join('')).appendTo(document.body).find('.btn').on('click', function(event) {
+                                event.preventDefault();
+
+                                app.gameOptions.set('window-options', {cookieInfo: true});
+                                $(event.target).parents('#cookie').remove();
+                            });
+                        }
+                        $('.fork-me').show();
                     });
-                }
-                // fork me
-                $('.fork-me').show();
+                });
             };
 
             if ( app.gameOptions.isLoaded() ) {

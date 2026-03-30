@@ -18,18 +18,11 @@
 #space #a-game-canvases {
     padding-top: 89px;
 }
-/*#pegasus #a-game-canvases {
-    padding-top: 89px;
-}*/
 #a-game-dashboard {
     top: 0px;
     left: -66px;
     width: 268px;
 }
-#pegasus #a-game-dashboard {
-    top: 366px;
-}
-
 /** lbx-games **/
 .lbx-games {
     height: 410px;

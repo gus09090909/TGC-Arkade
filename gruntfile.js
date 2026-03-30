@@ -5,7 +5,7 @@ module.exports = function(grunt) {
         '/*! \n' +
         ' * Copyright (c) Budnix. \n' +
         ' * Licensed under the MIT license. \n' +
-        ' * https://github.com/budnix/ball-and-wall \n' +
+        ' * Forked from the Ball And Wall project \n' +
         ' * \n' +
         ' * Date: <%= grunt.template.today() %> \n' +
         ' */ \n';
@@ -39,6 +39,8 @@ module.exports = function(grunt) {
                     'ENV': true,
                     'REVISION': true,
                     'EPISODES': true,
+                    'TGC_CLOUD_SYNC_URL': true,
+                    'TGC_CLOUD_SYNC_TOKEN': true,
                     'define': true,
                     'require': true,
                     'createjs': true,
@@ -70,6 +72,12 @@ module.exports = function(grunt) {
                     'js/app/core/mediator.js',
                     'js/app/core/tab.js',
                     'js/app/core/_.js',
+                    'js/app/tgc-cloud.js',
+                    'js/app/tgc-toast.js',
+                    'js/app/tgc-achievements.js',
+                    'js/app/tgc-session.js',
+                    'js/app/tgc-profile.js',
+                    'js/app/tgc-welcome.js',
                     // dashboard
                     'js/app/dashboard/_base.js',
                     'js/app/dashboard/auth.js',
@@ -110,12 +118,6 @@ module.exports = function(grunt) {
                     'js/app/entity/_.js',
                     // episodes
                     'js/app/episodes/episode.js',
-                    'js/app/episodes/pegasus/blocks.js',
-                    'js/app/episodes/pegasus/bonuses.js',
-                    'js/app/episodes/pegasus/levels.js',
-                    'js/app/episodes/pegasus/manifest.js',
-                    'js/app/episodes/pegasus/resources.js',
-                    'js/app/episodes/pegasus/splash-screen.js',
                     'js/app/episodes/space/blocks.js',
                     'js/app/episodes/space/bonuses.js',
                     'js/app/episodes/space/levels.js',
@@ -146,6 +148,7 @@ module.exports = function(grunt) {
                     'js/app/window/preloader-indicator.js',
                     'js/app/window/round-win.js',
                     'js/app/window/rounds.js',
+                    'js/app/window/profile.js',
                     'js/app/window/_.js',
                     // game
                     'js/app/dashboard.js',

@@ -113,8 +113,7 @@ function(WindowBase, utilsNumber, i18, WindowEpisodeWin, core, player) {
                     ]}
                 ]},
                 {tag: 'div', className: 'row buttons', childs: [
-                    {tag: 'div', className: 'medium primary btn ' + 
-                                (this.options.episode == 'pegasus' ? 'warning' : ''), childs: [
+                    {tag: 'div', className: 'medium primary btn', childs: [
                         {tag: 'a', html: i18._('round-win-retry'), 
                             events: [{click: $.proxy(this.onClickRetryButton, this)}]}
                     ]},

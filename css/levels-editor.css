@@ -18,9 +18,6 @@ canvas {
 #space #dashboard {
     background-image: url(../images/episodes/space/editor-side-bg.png);
 }
-#pegasus #dashboard {
-    background-image: url(../images/episodes/pegasus/editor-side-bg.png);
-}
 .class-levels-editor-page #a-game-canvases {
     width: 1090px;
 }
@@ -37,9 +34,6 @@ canvas {
 #space .edit-header {
     color: #eee;    
 }
-#pegasus .edit-header {
-    color: #222;
-}
 .episodes-header, .static-blocks-header, .interactive-blocks-header, .actions-header {
     font-size: 11px;
     font-weight: bold;
@@ -47,9 +41,6 @@ canvas {
 }
 #space .episodes-header, #space .static-blocks-header, #space .interactive-blocks-header, #space .actions-header {
     color: #eee;    
-}
-#pegasus .episodes-header, #pegasus .static-blocks-header, #pegasus .interactive-blocks-header, #pegasus .actions-header {
-    color: #222;    
 }
 .episodes-header {
     border-top: 1px dotted #183c67    
@@ -74,14 +65,7 @@ canvas {
 #space .static-block {
     height: 27px;
 }
-#pegasus .static-block {
-    height: 44px;
-}
 #space .interactive-block {
-    width: 44px;
-    height: 44px;
-}
-#pegasus .interactive-block {
     width: 44px;
     height: 44px;
 }

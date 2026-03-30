@@ -1,30 +1,34 @@
 {
-  "name": "ball-and-wall",
+  "name": "tgc-arkade",
   "version": "1.0.0",
-  "description": "Arkanoid style game",
-  "main": "index.html",
+  "description": "TGC-Arkade — arkanoid game with cloud progress",
+  "main": "server/index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  },
   "devDependencies": {
+    "bower": "^1.8.14",
     "grunt": "^0.4.5",
+    "grunt-cli": "^1.4.3",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-cssmin": "^0.12.2",
+    "grunt-contrib-cssmin": "^5.0.0",
     "grunt-contrib-htmlmin": "^0.4.0",
     "grunt-contrib-jshint": "^0.11.0",
     "grunt-contrib-uglify": "^0.8.0",
     "grunt-processhtml": "^0.3.7"
   },
   "scripts": {
+    "start": "node server/index.js",
+    "build": "grunt build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/budnix/ball-and-wall.git"
+    "url": "https://github.com/gus09090909/TGC-Arkade.git"
   },
-  "author": "Krzysztof Budnik <budnix@gmail.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/budnix/ball-and-wall/issues"
-  },
-  "homepage": "https://github.com/budnix/ball-and-wall"
+  "homepage": "https://github.com/gus09090909/TGC-Arkade"
 }

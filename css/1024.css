@@ -49,11 +49,6 @@ canvas#a-game-dashboard {
     height: 363px !important;
 }
 
-/** pegasus lbx-win **/
-#pegasus .lbx-win .tab-contents {
-    height: 463px;
-}
-
 /** space lbx-win **/
 #space .lbx-win .tab-contents {
     height: 468px;

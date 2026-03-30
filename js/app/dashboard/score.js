@@ -14,6 +14,7 @@ function(Base, episode) {
         this.entity.y = score.y;
         this.entity.textAlign = score.textAlign;
         this.score = 0;
+        this.sessionAccumulated = 0;
         this.initialize(dashboard);
     }
     
@@ -37,7 +38,14 @@ function(Base, episode) {
      * @return {Number}
      */
     DashboardScore.prototype.get = function() {
-        return this.score;
+        return (this.sessionAccumulated | 0) + (this.score | 0);
+    };
+
+    /**
+     * Points earned in the current level only (session total = get() - getLevelScore() + getLevelScore()).
+     */
+    DashboardScore.prototype.getLevelScore = function() {
+        return this.score | 0;
     };
 
     /**
@@ -74,19 +82,36 @@ function(Base, episode) {
      * @method reset
      */
     DashboardScore.prototype.reset = function() {
-        if ( this.get() === 0 ) {
-            return;
-        }
         this.score = 0;
         this._updateScore();
-        this.emit('change', [this.score]);
+        this.emit('change', [this.get()]);
+    };
+
+    /**
+     * New run after game over — clears session accumulation and level score.
+     */
+    DashboardScore.prototype.resetSession = function() {
+        this.sessionAccumulated = 0;
+        this.score = 0;
+        this._updateScore();
+        this.emit('change', [this.get()]);
+    };
+
+    /**
+     * After clearing a level — keep session total, reset level counter.
+     */
+    DashboardScore.prototype.commitLevelToSession = function() {
+        this.sessionAccumulated = (this.sessionAccumulated | 0) + (this.score | 0);
+        this.score = 0;
+        this._updateScore();
+        this.emit('change', [this.get()]);
     };
 
     /**
      * @method _updateScore
      */
     DashboardScore.prototype._updateScore = function() {
-        this.update(this.score);
+        this.update(String((this.sessionAccumulated | 0) + (this.score | 0)));
     };
 
     return DashboardScore;

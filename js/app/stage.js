@@ -74,10 +74,8 @@ function(preloader, input, sound, episode, core) {
                 entity.initDefaults();
             }
         }
-        // TODO To consider thinks about sorting layers
-        if ( episode.getName() == 'pegasus' ) {
-            this.sortChildrenByLayer();
-        }
+        // Keep layers stable for entity rendering.
+        this.sortChildrenByLayer();
     };
     
     /**

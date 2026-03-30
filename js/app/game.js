@@ -6,12 +6,14 @@ define('app/game',
     'app/dashboard', 'app/player', 'app/core/_', 'app/indicator', 'app/preloader', 'app/i18/_', 'app/sound',
     'app/levels', 'app/input/_', 'app/facade',
     'app/window/_',
-    'app/game-options', 'app/episodes/_'
+    'app/game-options', 'app/episodes/_',
+    'app/tgc-profile', 'app/tgc-achievements', 'app/tgc-session', 'app/tgc-cloud'
 ], 
 function(stage, 
         entities, entity,
         dashboard, player, core, indicator, preloader, i18, sound, 
-        levels, input, facade, _window, gameOptions, episode) {
+        levels, input, facade, _window, gameOptions, episode,
+        tgcProfile, tgcAchievements, tgcSession, tgcCloud) {
             
     var 
         /**
@@ -35,6 +37,7 @@ function(stage,
         this.isGameStarted = false;
         this.isGameLoaded = false;
         this.episodeLevel = 0;
+        tgcSession.setSessionActive(false);
         
         if ( this.options.splashscreen ) {
             dashboard.disabled(true);
@@ -45,7 +48,7 @@ function(stage,
         this.applyI18();
         preloader.load();
         
-        this.windowAuth = new _window.Auth();
+        // auth window disabled in this build
         this.windowFirstTime = new _window.FirstTime();
         this.windowGames = new _window.Games();
         this.windowHelp = new _window.Help();
@@ -53,6 +56,7 @@ function(stage,
         this.windowOrientationIndicator = new _window.OrientationIndicator();
         this.windowRounds = new _window.Rounds();
         this.windowRoundWin = new _window.RoundWin();
+        this.windowProfile = new _window.Profile();
         
         this.onWindowResize();
         this.onWindowOrientationChange();
@@ -75,16 +79,13 @@ function(stage,
             d.bind('webkitvisibilitychange', $.proxy(this.onWindowVisibilityChange, this));
         }
         $('#' + stage.stage.canvas.id).bind('click', $.proxy(this.onStageClick, this));
-        $('#a-auth').bind('click', $.proxy(this.onBtnUserClick, this));
-        this.windowAuth.addListener('clickLogin', $.proxy(this.onWindowAuthClickLogin, this));
-        this.windowAuth.addListener('clickRegister', $.proxy(this.onWindowAuthClickRegister, this));
         this.windowFirstTime.addListener('close', $.proxy(this.onWindowFirstTimeClose, this));
         this.windowGames.addListener('selectEpisode', $.proxy(this.onWindowGamesSelectEpisode, this));
         this.windowRounds.addListener('back', $.proxy(this.onWindowRoundsBack, this));
         this.windowRounds.addListener('play', $.proxy(this.onWindowRoundsPlayGame, this));
         this.windowRoundWin.addListener('goToEpisodes', $.proxy(this.onWindowStatsGoToEpisodes, this));
         this.windowRoundWin.addListener('goToRounds', $.proxy(this.onWindowGamesSelectEpisode, this));
-        this.windowRoundWin.addListener('nextRound', $.proxy(this.onWindowRoundWinNextRound, this));
+        this.windowRoundWin.addListener('nextRound', $.proxy(this.onWindowGamesSelectEpisode, this));
         this.windowRoundWin.addListener('retryRound', $.proxy(this.onWindowRoundWinRetryRound, this));
         core.mediator.addListener('game:game-over', $.proxy(this.onGameOver, this));
         core.mediator.addListener('game:stage-clear', $.proxy(this.onGameClearStage, this));
@@ -93,9 +94,9 @@ function(stage,
         dashboard.addListener('clickPlay', $.proxy(this.onBtnStartGameClick, this));
         dashboard.addListener('clickUser', $.proxy(this.onBtnUserClick, this));
         gameOptions.addListener('change:window-games', $.proxy(this.onEpisodeChange, this));
-        player.addListener('login', $.proxy(this.onPlayerLogin, this));
         player.addListener('logout', $.proxy(this.onPlayerLogout, this));
         player.addListener('register', $.proxy(this.onPlayerRegister, this));
+        player.addListener('login', $.proxy(this.onPlayerLogin, this));
         preloader.addListener('complete', $.proxy(this.onPreloaderComplete, this));
     };
     
@@ -116,6 +117,12 @@ function(stage,
         }
         if ( !this.isGameStarted ) {
             entities.paddles.hide();
+        } else if ( !event.paused ) {
+            var d = event.delta;
+            if ( !d || d < 0 ) {
+                d = Math.round(1000 / Math.max(1, createjs.Ticker.getFPS()));
+            }
+            tgcProfile.addPlayTimeMs(d);
         }
         entities.paddles.update(event);
         levels.getBonuses().update(event);
@@ -142,7 +149,7 @@ function(stage,
         this.isGameStarted = true;
         core.mediator.emit('game:game-start');
         dashboard.getTime().reset();
-        dashboard.getScore().reset();
+        dashboard.getScore().resetSession();
         dashboard.getSpeed().reset();
         dashboard.getLives().reset();
         
@@ -171,7 +178,6 @@ function(stage,
         dashboard.getSpeed().reset();
         dashboard.getRound().set(levels.getCurrentLevelIndex() + 1);
         dashboard.getTime().start();
-        this.windowRounds.unlockLevel(episode.getName(), levels.getCurrentLevelIndex());
         
         if ( !levels.isCustom() ) {
             facade.clear().show(i18._('round') + ' ' + (levels.getCurrentLevelIndex() + 1)
@@ -227,6 +233,24 @@ function(stage,
      * @method onGameOver
      */
     Game.prototype.onGameOver = function() {
+        var _this = this;
+        tgcProfile.flushPlayBuffer();
+        var total = dashboard.getScore().get();
+        var u = tgcProfile.getUsername();
+        if ( this.isGameStarted && u && tgcCloud.enabled() ) {
+            tgcCloud.sessionEnd(u, total, function(resp) {
+                if ( resp && resp.profile ) {
+                    tgcProfile.mergeProfileAfterSessionEnd(resp.profile);
+                }
+                _this._syncTgcAchievements();
+                core.mediator.emit('tgc:leaderboard-dirty');
+            });
+        } else if ( this.isGameStarted ) {
+            this._syncTgcAchievements();
+        }
+        dashboard.getScore().resetSession();
+        tgcSession.setSessionActive(false);
+        tgcSession.resetPlayed();
         this.gameOver();
     };
 
@@ -251,14 +275,26 @@ function(stage,
             if ( this.windowRoundWin.isOpened() ) {
                 return;
             }
+            var roundIdx = levels.getCurrentLevelIndex() + 1;
+            var levZero = levels.getCurrentLevelIndex();
+            var timeSec = dashboard.getTime().get();
+            var livesLeft = dashboard.getLives().get();
+            var scoreVal = dashboard.getScore().get();
+            var levelScore = dashboard.getScore().getLevelScore();
+            if ( !levels.isCustom() ) {
+                tgcProfile.flushPlayBuffer();
+                dashboard.getScore().commitLevelToSession();
+                tgcProfile.applyLevelWin(levZero, levelScore, timeSec, livesLeft, levels.getLevelsLength());
+                this._syncTgcAchievements();
+            }
             this.windowRoundWin.open({
                 isCustom: levels.isCustom(),
                 episode: episode.getName(),
-                round: levels.getCurrentLevelIndex() + 1,
+                round: roundIdx,
                 maxRound: levels.getLevelsLength(),
-                time: dashboard.getTime().get(), 
-                lives: dashboard.getLives().get(),
-                score: dashboard.getScore().get()
+                time: timeSec, 
+                lives: livesLeft,
+                score: scoreVal
             });
             sound.play('win');
         }, this), 2000);
@@ -296,25 +332,14 @@ function(stage,
      * @param {Object} event
      */
     Game.prototype.onPlayerLogin = function(event) {
-        // Support for logged players
         if ( event.result == 'ok' ) {
             dashboard.getAuth().login(event.response);
-
-            if ( !event.silentMode ) {
-                this.windowAuthDashboard.open();
-            }
             indicator.hide();
         } else {
-            dashboard.getAuth().logout();
-
-            if ( event.silentMode ) {
-                indicator.hide();
-            } else {
-                setTimeout($.proxy(function() {
-                    this.windowAuth.open('login', true);
-                    indicator.hide();
-                }, this), 1000);
+            if ( !event.silentMode ) {
+                dashboard.getAuth().logout();
             }
+            indicator.hide();
         }
     };
     
@@ -330,22 +355,14 @@ function(stage,
      * @param {Object} event
      */
     Game.prototype.onPlayerRegister = function(event) {
-        // Support for register players
         if ( event.result == 'ok' ) {
             dashboard.getAuth().login(event.response);
-            this.windowAuthDashboard.open();
             indicator.hide();
         } else {
-            dashboard.getAuth().logout();
-
-            if ( event.silentMode ) {
-                indicator.hide();
-            } else {
-                setTimeout($.proxy(function() {
-                    this.windowAuth.open('register', true);
-                    indicator.hide();
-                }, this), 1000);
+            if ( !event.silentMode ) {
+                dashboard.getAuth().logout();
             }
+            indicator.hide();
         }
     };
     
@@ -400,9 +417,20 @@ function(stage,
         if ( event ) {
             event.preventDefault();
         }
-        if ( !player.isLogged() ) {
-            this.windowAuth.open('login');
-        }
+        this.windowProfile.open();
+    };
+
+    /**
+     * @method _syncTgcAchievements
+     */
+    Game.prototype._syncTgcAchievements = function() {
+        var ctx = {levelCount: levels.getLevelsLength()};
+        var d = tgcProfile.get();
+        tgcAchievements.evaluate(d, ctx, function(def) {
+            tgcAchievements.notifyUnlock(def);
+        });
+        tgcProfile.persist();
+        tgcProfile.schedulePush();
     };
     
     // WindowStatsWin
@@ -418,14 +446,7 @@ function(stage,
     };
     
     /**
-     * @method onWindowRoundWinNextRound
-     */
-    Game.prototype.onWindowRoundWinNextRound = function() {
-        this.startLevelGame(levels.getCurrentLevelIndex() + 1);
-    };
-    
-    /**
-     * @method onWindowRoundWinNextRound
+     * @method onWindowStatsGoToEpisodes
      */
     Game.prototype.onWindowStatsGoToEpisodes = function() {
         if ( this.options.customLevel ) {
@@ -451,7 +472,16 @@ function(stage,
      * @param {Object} event
      */
     Game.prototype.onWindowRoundsPlayGame = function(event) {
-        this.startNewGame(event.episode, event.level);
+        var lev = event.level >> 0;
+        if ( !tgcSession.isSessionActive() ) {
+            tgcSession.resetPlayed();
+            tgcSession.markPlayed(lev);
+            tgcSession.setSessionActive(true);
+            this.startNewGame(event.episode, lev);
+        } else {
+            tgcSession.markPlayed(lev);
+            this.startLevelGame(lev);
+        }
     };
 
     // WindowGames
@@ -463,25 +493,6 @@ function(stage,
             game: episode.getName(),
             levels: levels.getLevelNames()
         });
-    };
-
-    // WindowAuth
-    /**
-     * @method onWindowAuthClickLogin
-     * @param {Object} loginData
-     */
-    Game.prototype.onWindowAuthClickLogin = function(loginData) {
-        indicator.show();
-        player.login(loginData);
-    };
-
-    /**
-     * @method onWindowAuthClickRegister
-     * @param {Object} registerData
-     */
-    Game.prototype.onWindowAuthClickRegister = function(registerData) {
-        indicator.show();
-        player.register(registerData);
     };
 
     // WindowFirstTime
@@ -592,6 +603,7 @@ function(stage,
      * @method onWindowBlur
      */
     Game.prototype.onWindowBlur = function() {
+        tgcProfile.flushPlayBuffer();
         createjs.Ticker.setPaused(true);
         sound.stopMusic(true);
     };

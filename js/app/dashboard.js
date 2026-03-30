@@ -1,9 +1,9 @@
 
 define('app/dashboard', 
 [
-    'app/core/_', 'app/dashboard/_', 'app/preloader', 'app/episodes/_'
+    'app/core/_', 'app/dashboard/_', 'app/preloader', 'app/episodes/_', 'app/i18/_', 'app/tgc-profile'
 ], 
-function(core, dashboard, preloader, episode) {
+function(core, dashboard, preloader, episode, i18, tgcProfile) {
     
     function Dashboard() {
         core.EventEmitter.call(this);
@@ -28,6 +28,21 @@ function(core, dashboard, preloader, episode) {
      */
     Dashboard.prototype.initEvents = function() {
         preloader.addListener('complete', $.proxy(this.onPreloaderComplete, this));
+        core.mediator.addListener('tgc:profile-updated', $.proxy(this.onTgcProfileUpdated, this));
+    };
+
+    /**
+     * @method onTgcProfileUpdated
+     */
+    Dashboard.prototype.onTgcProfileUpdated = function(profile) {
+        if ( !this.auth ) {
+            return;
+        }
+        if ( profile && profile.username ) {
+            this.auth.update(i18._('welcome-player') + '\n' + profile.username + '!');
+        } else {
+            this.auth.reset();
+        }
     };
     
     /**
@@ -147,6 +162,7 @@ function(core, dashboard, preloader, episode) {
         this.lives = new dashboard.Lives(this);
         this.round = new dashboard.Round(this);
         this.auth = new dashboard.Auth(this);
+        this.onTgcProfileUpdated(tgcProfile.get());
 
         if ( !this.stage ) {
             return;

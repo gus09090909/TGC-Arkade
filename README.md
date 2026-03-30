@@ -1,38 +1,90 @@
-# ball-and-wall
+# TGC-Arkade
 
-Ball And Wall - Arkanoid style game
+Arkanoid-style game (The Giveaways Club Arkade).
 
-## Demo
+## Tus enlaces (GitHub: **gus09090909** / repo: **TGC-Arkade**)
 
-Demo available at http://budnix.github.io/ball-and-wall/ and extended version using this code at http://ballandwall.com.
+| Qué | Enlace |
+|-----|--------|
+| **Código en GitHub** | https://github.com/gus09090909/TGC-Arkade |
+| **Clonar** | `git clone https://github.com/gus09090909/TGC-Arkade.git` |
+| **Descargar ZIP** | https://github.com/gus09090909/TGC-Arkade/archive/refs/heads/master.zip |
+| **Juego online** (cuando lo despliegues en Render) | https://tgc-arkade.onrender.com |
 
-## Install
+La URL del juego (`*.onrender.com`) es la que eliges al crear el servicio en Render. En [`render.yaml`](render.yaml) el nombre del servicio es `tgc-arkade`, así que Render suele asignar **`https://tgc-arkade.onrender.com`**. Si pones otro nombre al servicio, la URL será `https://OTRO-NOMBRE.onrender.com`.
 
-[download as ZIP](https://github.com/budnix/ball-and-wall/archive/master.zip).
+> **Sobre los cambios en el repo:** todo lo que hacemos en Cursor se guarda en **los archivos de tu carpeta del proyecto** en el PC. Eso es tu copia local del repo. Para que aparezca en GitHub tienes que hacer tú **`git add` → `git commit` → `git push`** (como con tus otros juegos). Desde aquí no se sube nada a GitHub por ti.
 
-## Usage
+## Jugar online con un solo enlace
 
-After downloading source code install dependencies via bower:
+El juego y la API van **en el mismo sitio**: abres la URL y ya puedes jugar (sin otro servidor aparte).
+
+### Opción recomendada: Render (gratis)
+
+1. Sube este repo a GitHub (si aún no está).
+2. Entra en [render.com](https://render.com), crea cuenta y **New → Web Service**.
+3. Conecta el repositorio `TGC-Arkade`.
+4. Configuración sugerida:
+   - **Build command:** `npm install && npx bower install --allow-root && npx grunt build`
+   - **Start command:** `npm start`
+   - **Instance type:** Free (o la que quieras)
+5. Despliega. Render te dará una URL pública, por ejemplo `https://tgc-arkade.onrender.com`.
+6. **Ese es el enlace** que puedes pasar a todo el mundo: al abrirlo carga el juego y las peticiones van a `/api/...` en el mismo dominio.
+
+En producción, `js/_config_prod.js` deja `TGC_CLOUD_SYNC_URL` vacío: el cliente usa la **misma URL** que la página (`/api/register`, `/api/leaderboard`, etc.).
+
+> **Nota:** En el plan gratuito de Render el servicio “se duerme” tras un rato sin uso; la primera carga puede tardar ~1 minuto. Los datos del ranking viven en disco del servidor (`server/data.json`); en free tier pueden perderse si el contenedor se recrea.
+
+También hay un [`render.yaml`](render.yaml) en la raíz para despliegue declarativo en Render.
+
+### Probar en tu PC (misma experiencia que online)
 
 ```sh
-$ bower install
+npm install
+npx bower install
+npx grunt build
+npm start
 ```
 
-And development tools via npm:
+Abre **http://localhost:3847/** (el puerto lo define `PORT` o por defecto 3847).
+
+### GitHub Pages
+
+GitHub Pages **solo sirve archivos estáticos**; no ejecuta Node. **No** sirve para este proyecto completo (hace falta la API). Usa Render, Railway, Fly.io u otro hosting con Node.
+
+---
+
+## Ver tu progreso
+
+1. Con el juego abierto, pulsa el **icono de usuario** del panel.
+2. Pestaña **Profile**: estadísticas y logros.
+3. Pestaña **Leaderboard**: ranking.
+
+También: `GET https://TU-SITIO/api/profile/TU_NOMBRE` devuelve JSON del perfil.
+
+---
+
+## Install (desarrollo)
+
+[Código fuente (ZIP)](https://github.com/gus09090909/TGC-Arkade/archive/refs/heads/master.zip)
 
 ```sh
-$ npm install
+npm install
+bower install
 ```
 
-Files with `_dev.html` postfix use uncompressed assets designed to development proposes.
+Archivos `*_dev.html` usan assets sin empaquetar. Para producción local:
 
-Run `grunt build` to build/update production files (`index.html` and `levels-editor.html`).
+```sh
+npx grunt build
+```
 
-Game has 2 episodes called space and pegasus. Space assets (images) were made by me and they are totally FREE.
-Pegasus images were bought from http://graphicriver.net/item/platformer-game-tile-set/3677579 so if you want use
-this images you must pay for it's license.
+## API (referencia)
+
+Rutas en [`server/index.js`](server/index.js): `/api/register`, `/api/profile/:username`, `/api/session-end`, `/api/leaderboard`.
+
+El servidor sirve el juego estático y bloquea rutas como `/server` y `/node_modules`.
 
 ## License
 
 [MIT License](http://opensource.org/licenses/MIT)
-

@@ -2,7 +2,6 @@
 define('app/window/_', [
     'app/window/_base',
     'app/window/alert',
-    'app/window/auth',
     'app/window/confirm',
     'app/window/episode-win',
     'app/window/first-time',
@@ -11,16 +10,16 @@ define('app/window/_', [
     'app/window/options',
     'app/window/orientation-indicator',
     'app/window/preloader-indicator',
+    'app/window/profile',
     'app/window/rounds',
     'app/window/round-win'
 ], 
-function(Base, Alert, Auth, Confirm, EpisodeWin, FirstTime, Games, Help, Options,
-         OrientationIndicator, PreloaderIndicator, Rounds, RoundWin) {
+function(Base, Alert, Confirm, EpisodeWin, FirstTime, Games, Help, Options,
+         OrientationIndicator, PreloaderIndicator, Profile, Rounds, RoundWin) {
 
     return {
         Base: Base,
         Alert: Alert,
-        Auth: Auth,
         Confirm: Confirm,
         EpisodeWin: EpisodeWin,
         FirstTime: FirstTime,
@@ -29,6 +28,7 @@ function(Base, Alert, Auth, Confirm, EpisodeWin, FirstTime, Games, Help, Options
         Options: Options,
         OrientationIndicator: OrientationIndicator,
         PreloaderIndicator: PreloaderIndicator,
+        Profile: Profile,
         Rounds: Rounds,
         RoundWin: RoundWin
     };
