@@ -159,6 +159,7 @@ function(stage,
         }
         dashboard.getTime().start();
         sound.stopMusic();
+        input.pointer.updateStageCoords();
     };
     
     /**
@@ -170,6 +171,8 @@ function(stage,
         levels.loadLevel(level).build();
         entities.balls.create();
         entities.paddles.create();
+        $('#a-game-canvas').addClass('a-playing');
+        this.isGameStarted = true;
         dashboard.getTime().reset();
         dashboard.getScore().reset();
         dashboard.getSpeed().reset();
@@ -182,6 +185,7 @@ function(stage,
         }
         core.mediator.emit('game:level-start', levels.getCurrentLevelIndex() + 1);
         sound.stopMusic();
+        input.pointer.updateStageCoords();
     };
         
     /**
@@ -555,6 +559,13 @@ function(stage,
             });
         }
         this.isGameLoaded = true;
+        var layoutThis = this;
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                layoutThis.applyMobileLayoutScale();
+                input.pointer.updateStageCoords();
+            });
+        });
     };
     
     /**
@@ -599,8 +610,106 @@ function(stage,
     Game.prototype.onWindowResize = function() {
         $(document.body).css('height', window.innerHeight + 'px');
         $(document.body).css('width', window.innerWidth + 'px');
+        this.applyMobileLayoutScale();
         input.pointer.updateStageCoords();
         window.scrollTo(0, 0);
+    };
+
+    /**
+     * Space index: keep desktop-sized DOM (798px) and scale the whole block to fit the viewport
+     * (“mini PC”). Uses a viewport wrapper so layout width/height match the scaled footprint.
+     * @method applyMobileLayoutScale
+     */
+    Game.prototype.applyMobileLayoutScale = function() {
+        var body = $(document.body),
+            isSpaceIndex = body.attr('id') === 'space' && body.hasClass('class-index-page'),
+            narrow = window.matchMedia ?
+                window.matchMedia('(max-width: 1080px)').matches :
+                (window.innerWidth <= 1080),
+            $wrap = $('#a-game-wrapper'),
+            $vp;
+
+        if ( !$wrap.length ) {
+            return;
+        }
+
+        $vp = $wrap.parent();
+
+        if ( !isSpaceIndex || !narrow ) {
+            if ( $vp.length && $vp[0].id === 'a-mobile-scale-viewport' ) {
+                $wrap.css({
+                    position: '',
+                    top: '',
+                    left: '',
+                    marginLeft: '',
+                    width: '',
+                    transform: '',
+                    webkitTransform: '',
+                    transformOrigin: '',
+                    webkitTransformOrigin: ''
+                });
+                $vp.css({
+                    position: '',
+                    width: '',
+                    height: '',
+                    marginLeft: '',
+                    marginRight: '',
+                    flexShrink: '',
+                    overflow: ''
+                });
+                $wrap.unwrap();
+            }
+            return;
+        }
+
+        if ( $vp[0].id !== 'a-mobile-scale-viewport' ) {
+            $wrap.wrap('<div id="a-mobile-scale-viewport"></div>');
+            $vp = $wrap.parent();
+        }
+
+        $vp.css({ width: 'auto', height: 'auto', overflow: 'visible' });
+        $wrap.css({
+            position: 'relative',
+            top: '',
+            left: '',
+            marginLeft: '',
+            transform: 'none',
+            webkitTransform: 'none',
+            transformOrigin: '',
+            webkitTransformOrigin: ''
+        });
+
+        var natW = $wrap.outerWidth(),
+            natH = $wrap.outerHeight(true),
+            pad = 12,
+            vw = Math.max(0, window.innerWidth - pad * 2),
+            vh = Math.max(0, window.innerHeight - pad * 2),
+            s = Math.min(vw / natW, vh / natH, 1);
+
+        if ( s < 0.08 || !isFinite(s) ) {
+            s = 0.08;
+        }
+
+        $vp.css({
+            position: 'relative',
+            width: (natW * s) + 'px',
+            height: (natH * s) + 'px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            flexShrink: 0,
+            overflow: 'visible'
+        });
+        $wrap.css({
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            marginLeft: (-natW / 2) + 'px',
+            width: natW + 'px',
+            transform: 'scale(' + s + ')',
+            webkitTransform: 'scale(' + s + ')',
+            transformOrigin: 'top center',
+            webkitTransformOrigin: 'top center'
+        });
     };
     
     /**
@@ -620,6 +729,10 @@ function(stage,
                 this.windowOrientationIndicator.close();
             }
         }
+        var orientThis = this;
+        setTimeout(function() {
+            orientThis.onWindowResize();
+        }, 350);
     };
     
     return Game;

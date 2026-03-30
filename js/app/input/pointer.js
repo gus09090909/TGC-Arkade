@@ -8,14 +8,14 @@ function(core) {
     function Pointer() {
         core.EventEmitter.call(this);
         this.canvasElement = $('#a-game-canvas');
-        // chrome on windows detect touch too
-        this.isTouchDevice = document.ontouchstart === null && core.helperBrowser.isMobile;
+        this.isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || core.helperBrowser.isMobile;
         this.x = 0;
         this.y = 0;
         this.leftClick = false;
         this.rightClick = false;
         this.preventDefault = true;
         this.canvasCoords = {};
+        this._touchHandlers = null;
         this.initialize();
     }
     
@@ -26,40 +26,80 @@ function(core) {
         }
     });
     
-    /**
-     * @method initialize
-     */
     Pointer.prototype.initialize = function() {
         this.onResize();
         this.initEvents();
     };
     
-    /**
-     * @method updateStageCoords
-     */
     Pointer.prototype.updateStageCoords = function() {
         this.onResize();
     };
 
     /**
-     * @method initEvents
+     * Viewport-relative box (works with CSS transform: scale on ancestors).
      */
+    Pointer.prototype._syncCanvasRectViewport = function() {
+        var el = this.canvasElement[0];
+        if ( !el ) {
+            return;
+        }
+        var r = el.getBoundingClientRect();
+        this.canvasCoords.left = r.left;
+        this.canvasCoords.top = r.top;
+        this.canvasCoords.width = r.width;
+        this.canvasCoords.height = r.height;
+    };
+
+    Pointer.prototype._getClientXY = function(nativeEvent) {
+        var e = nativeEvent;
+        if ( e.touches && e.touches.length ) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        if ( e.changedTouches && e.changedTouches.length ) {
+            return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+    };
+
     Pointer.prototype.initEvents = function() {
-        var _this = this, d = $(document);
-        
+        var _this = this,
+            d = $(document),
+            passiveNo = { passive: false };
+
         if ( this.isTouchDevice ) {
-            d.bind('touchstart', function(event) {
-                _this.onPointerDown(event);
-            });
-            d.bind('touchend', function(event) {
-                _this.onPointerUp(event);
-            });
-            d.bind('touchcancel', function(event) {
-                _this.onPointerUp(event);
-            });
-            d.bind('touchmove', function(event) {
-                _this.onPointerMove(event);
-            });
+            this._touchHandlers = {
+                start: function(ev) {
+                    _this._syncCanvasRectViewport();
+                    _this.leftClick = true;
+                    _this.rightClick = false;
+                    var p = _this._getClientXY(ev);
+                    _this._applyPointerXY(p.x, p.y);
+                    if ( _this.preventDefault && ev.cancelable ) {
+                        ev.preventDefault();
+                    }
+                },
+                move: function(ev) {
+                    if ( _this.preventDefault && ev.cancelable ) {
+                        ev.preventDefault();
+                    }
+                    _this._syncCanvasRectViewport();
+                    var p = _this._getClientXY(ev);
+                    _this._applyPointerXY(p.x, p.y);
+                },
+                end: function(ev) {
+                    _this._syncCanvasRectViewport();
+                    _this.leftClick = false;
+                    _this.rightClick = false;
+                    if ( ev.changedTouches && ev.changedTouches.length ) {
+                        var t = ev.changedTouches[0];
+                        _this._applyPointerXY(t.clientX, t.clientY);
+                    }
+                }
+            };
+            document.addEventListener('touchstart', this._touchHandlers.start, passiveNo);
+            document.addEventListener('touchmove', this._touchHandlers.move, passiveNo);
+            document.addEventListener('touchend', this._touchHandlers.end, passiveNo);
+            document.addEventListener('touchcancel', this._touchHandlers.end, passiveNo);
         } else {
             d.bind('mousedown', function(event) {
                 _this.onPointerDown(event);
@@ -69,7 +109,7 @@ function(core) {
             });
             d.bind('mousemove', function(event) {
                 _this.onPointerMove(event);
-            });   
+            });
         }
         $(window).bind('resize', $.proxy(this.onResize, this));
         this.canvasElement.bind('click', $.proxy(this.onCanvasClick, this));
@@ -77,127 +117,79 @@ function(core) {
         core.mediator.addListener('windowClose', $.proxy(this.onWindowClose, this));
     };
 
-    /**
-     * @method isClick
-     * @return {Boolean}
-     */
+    Pointer.prototype._applyPointerXY = function(clientX, clientY) {
+        var dx = clientX - this.canvasCoords.left;
+        var dy = clientY - this.canvasCoords.top;
+        this.x = dx > 0 ? (dx < this.canvasCoords.width ? dx : this.canvasCoords.width) : 0;
+        this.y = dy > 0 ? (dy < this.canvasCoords.height ? dy : this.canvasCoords.height) : 0;
+    };
+
     Pointer.prototype.isClick = function() {
         return this.isLeftClick();
     };
     
-    /**
-     * @method isLeftClick
-     * @return {Boolean}
-     */
     Pointer.prototype.isLeftClick = function() {
         return this.leftClick;
     };
     
-    /**
-     * @method isRightClick
-     * @return {Boolean}
-     */
     Pointer.prototype.isRightClick = function() {
         return this.rightClick;
     };
     
-    /**
-     * @method onCanvasClick
-     */
     Pointer.prototype.onCanvasClick = function() {
-//        this.fireEvent('click');
     };
 
-    /**
-     * @method onPointerDown
-     */
     Pointer.prototype.onPointerDown = function(event) {
         if ( this.isTouchDevice ) {
             this.leftClick = true;
         } else {
-            // left click
             if ( event.button === 0 ) {
                 this.leftClick = true;
-            // right click
             } else if ( event.button === 2 ) {
                 this.rightClick = true;
             }
         }
     };
 
-    /**
-     * @method onPointerUp
-     */
     Pointer.prototype.onPointerUp = function(event) {
         if ( this.isTouchDevice ) {
             this.leftClick = false;
             this.rightClick = false;
         } else {
-            // left click
             if ( event.button === 0 ) {
                 this.leftClick = false;
-            // right click
             } else if ( event.button === 2 ) {
                 this.rightClick = false;
             }
         }
     };
 
-    /**
-     * @method onPointerMove
-     * @param {Object} event
-     */
     Pointer.prototype.onPointerMove = function(event) {
-        var dx, dy;
-
-        event.preventDefault();
-
-        if ( this.isTouchDevice ) {
-            var touches = event.originalEvent.changedTouches,
-                isMsPointer = window.navigator.msPointerEnabled,
-                firstTouch = isMsPointer ? event.originalEvent : touches[0];
-
-            if ( isMsPointer && !event.isPrimary ) {
-                return;
-            }
-            if ( !isMsPointer ) {
-                if ( event.originalEvent && event.originalEvent.length > 1 ) {
-                    return;
-                }
-            }
-            
-            dx = firstTouch.clientX;
-            dy = firstTouch.clientY;
-        } else {
-            dx = event.clientX;
-            dy = event.clientY;
+        if ( this.preventDefault && event.cancelable ) {
+            event.preventDefault();
         }
-        dx = dx - this.canvasCoords.left;
-        dy = dy - this.canvasCoords.top;
-        
-        this.x = dx > 0 ? (dx < this.canvasCoords.width ? dx : this.canvasCoords.width) : 0;
-        this.y = dy > 0 ? (dy < this.canvasCoords.height ? dy : this.canvasCoords.height) : 0;
+
+        var clientX, clientY;
+        if ( event.originalEvent ) {
+            var p = this._getClientXY(event.originalEvent);
+            clientX = p.x;
+            clientY = p.y;
+        } else {
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+        this._syncCanvasRectViewport();
+        this._applyPointerXY(clientX, clientY);
     };
 
-    /**
-     * @method onResize
-     */
     Pointer.prototype.onResize = function() {
-        this.canvasCoords = this.canvasElement.offset();
-        this.canvasCoords.width = this.canvasElement.width();
-        this.canvasCoords.height = this.canvasElement.height();
+        this._syncCanvasRectViewport();
     };
     
-    /**
-     * @method onWindowOpen
-     */
     Pointer.prototype.onWindowOpen = function() {
         this.preventDefault = false;
     };
     
-    /**
-     * @method onWindowClose
-     */
     Pointer.prototype.onWindowClose = function() {
         if ( !$('.lbx-window').length ) {
             this.preventDefault = true;

@@ -200,8 +200,7 @@ function(EntityBase, tail, explosion, sound, gameOptions, stage, preloader, core
             this.tail.destroy();
             this.tail = null;
         }
-//        stage.stage.removeEventListener('click', this._onStageClick);
-        $('#' + stage.stage.canvas.id).bind('click', this._onStageClick);
+        $('#' + stage.stage.canvas.id).unbind('click', this._onStageClick);
     };
 
     /**

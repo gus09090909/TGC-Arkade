@@ -1868,3 +1868,84 @@ body.class-policy-privacy-page p {
 .option-item-entry.tgc-round-played-session .round-name {
     color: #888;
 }
+
+/*
+ * Mobile / tablet: full desktop layout (798×…) kept intact, scaled down as one “mini PC”.
+ * transform: scale() is applied via JS (game.applyMobileLayoutScale). !important beats 480/640.css.
+ */
+@media screen and (max-width: 1080px) {
+    body#space.class-index-page {
+        overflow-x: hidden;
+        touch-action: none;
+        -webkit-touch-callout: none;
+    }
+    body#space.class-index-page #a-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        min-height: 100dvh;
+        max-width: 100vw;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-left: env(safe-area-inset-left, 0px);
+    }
+    body#space.class-index-page #a-game-wrapper {
+        width: 798px !important;
+        max-width: 798px !important;
+        margin: 0 auto;
+        flex-shrink: 0;
+        transform-origin: top center;
+        -webkit-transform-origin: top center;
+    }
+    body#space.class-index-page #a-game-canvases {
+        position: relative !important;
+        width: 798px !important;
+        max-width: 798px !important;
+        margin: 0 auto !important;
+        padding-top: 130px !important;
+        box-sizing: content-box !important;
+    }
+    body#space.class-index-page canvas#a-game-canvas {
+        display: block !important;
+        width: 798px !important;
+        max-width: 798px !important;
+        height: 462px !important;
+        margin: 0 auto !important;
+        box-sizing: border-box !important;
+    }
+    body#space.class-index-page canvas#a-game-dashboard {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 50% !important;
+        right: auto !important;
+        margin-left: 0 !important;
+        transform: translateX(-50%) !important;
+        -webkit-transform: translateX(-50%) !important;
+        width: 417px !important;
+        max-width: 417px !important;
+        height: 214px !important;
+        z-index: 15 !important;
+    }
+    body#space.class-index-page #a-game-bottom-line {
+        width: 798px !important;
+        max-width: 798px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        background-size: 100% auto !important;
+    }
+    body#space.class-index-page #a-auth,
+    body#space.class-index-page #a-level-editor {
+        position: relative !important;
+        right: auto !important;
+        top: auto !important;
+        width: 280px !important;
+        max-width: 90vw !important;
+        margin: 10px auto 0 !important;
+        box-sizing: border-box !important;
+    }
+}
