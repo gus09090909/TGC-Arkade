@@ -1,6 +1,9 @@
 
 module.exports = function(grunt) {
 
+    /** Bump when you need browsers to fetch fresh dist/common.css + dist/output.min.js */
+    var HTML_ASSET_VERSION = '3';
+
     var banner = 
         '/*! \n' +
         ' * Copyright (c) Budnix. \n' +
@@ -243,6 +246,18 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
 
+    grunt.registerTask('htmlCacheBust', 'Query-string on dist CSS/JS so CDN/browsers fetch new bundles', function() {
+        var q = '?v=' + HTML_ASSET_VERSION;
+        ['index.html', 'levels-editor.html'].forEach(function(f) {
+            if ( !grunt.file.exists(f) ) {
+                return;
+            }
+            var html = grunt.file.read(f);
+            html = html.replace(/href="dist\/common\.css"/g, 'href="dist/common.css' + q + '"');
+            html = html.replace(/src="dist\/output\.min\.js"/g, 'src="dist/output.min.js' + q + '"');
+            grunt.file.write(f, html);
+        });
+    });
 
-    grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'cssmin', 'processhtml', 'clean']);
+    grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'cssmin', 'processhtml', 'htmlCacheBust', 'clean']);
 };

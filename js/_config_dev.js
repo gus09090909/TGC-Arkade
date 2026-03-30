@@ -7,7 +7,7 @@ var
     // Game version
     VERSION = '1.0.0',
     // Revision of your all static files (after update you should increase this value)
-    REVISION = '?v=1',
+    REVISION = '?v=3',
     // Available episodes
     EPISODES = ['space'],
     ENV = 'dev',
