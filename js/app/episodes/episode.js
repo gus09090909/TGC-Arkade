@@ -1,9 +1,8 @@
 
 define('app/episodes/episode', 
 [
-    'app/core/helper/app'
 ], 
-function(helperApp) {
+function() {
     
     function Episode() {
         this.episode = null;
@@ -130,9 +129,8 @@ function(helperApp) {
         var resources = require('app/episodes/' + this.episode + '/resources').call(this);
         
         resources = $.map(resources, function(value) {
-            if ( helperApp.pixelRatio() >= 2 ) {
-                value.src = value.src.replace(/(\.(png))$/, '@2x$1');
-            }
+            // No forzar @2x: muchos assets (bloques, partículas) solo existen en 1x; si fallan,
+            // preloader.get(...) es undefined y Bitmap(...) rompe tras la carga (pantalla negra).
             value.src = value.src + REVISION;
             
             return value;

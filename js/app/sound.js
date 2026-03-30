@@ -115,6 +115,10 @@ function(core, gameOptions) {
         } else {
             volume = _loopSounds.music.volume * Math.PI / 2;
         }
+
+        if ( !_loopSounds.music ) {
+            return;
+        }
         
         _playMusicTimer = setInterval(function() {
             volume = volume + 0.05;
