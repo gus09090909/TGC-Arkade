@@ -84,7 +84,6 @@ function(stage,
         this.windowRoundWin.addListener('goToEpisodes', $.proxy(this.onWindowStatsGoToEpisodes, this));
         this.windowRoundWin.addListener('goToRounds', $.proxy(this.onWindowGamesSelectEpisode, this));
         this.windowRoundWin.addListener('nextRound', $.proxy(this.onWindowGamesSelectEpisode, this));
-        this.windowRoundWin.addListener('retryRound', $.proxy(this.onWindowRoundWinRetryRound, this));
         core.mediator.addListener('game:game-over', $.proxy(this.onGameOver, this));
         core.mediator.addListener('game:stage-clear', $.proxy(this.onGameClearStage, this));
         dashboard.addListener('clickHelp', $.proxy(this.onBtnHelpClick, this));
@@ -432,17 +431,6 @@ function(stage,
     };
     
     // WindowStatsWin
-    /**
-     * @method onWindowRoundWinRetryRound
-     */
-    Game.prototype.onWindowRoundWinRetryRound = function() {
-        if ( this.options.customLevel ) {
-            this.startLevelGame('custom:' + this.options.customLevel.split(':')[1]);
-        } else {
-            this.startLevelGame(levels.getCurrentLevelIndex());
-        }
-    };
-    
     /**
      * @method onWindowStatsGoToEpisodes
      */

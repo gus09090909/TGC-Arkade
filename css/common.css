@@ -1143,9 +1143,23 @@ body.class-policy-privacy-page p {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     box-sizing: border-box;
 }
+.tgc-welcome__photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.14;
+    pointer-events: none;
+    min-height: 100%;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+}
 .tgc-welcome__backdrop {
     position: absolute;
     inset: 0;
+    z-index: 0;
     min-height: 100%;
     min-height: 100dvh;
     min-height: -webkit-fill-available;
@@ -1183,6 +1197,7 @@ body.class-policy-privacy-page p {
 .tgc-welcome__vignette {
     position: absolute;
     inset: 0;
+    z-index: 1;
     min-height: 100%;
     min-height: 100dvh;
     min-height: -webkit-fill-available;
@@ -1191,7 +1206,7 @@ body.class-policy-privacy-page p {
 }
 .tgc-welcome__panel {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     max-width: 520px;
     margin: 0 auto;
     padding: clamp(20px, 5vh, 56px) max(16px, env(safe-area-inset-left)) clamp(24px, 6vh, 64px) max(16px, env(safe-area-inset-right));
@@ -1561,13 +1576,65 @@ body.class-policy-privacy-page p {
     opacity: 0.92;
 }
 .lbx-profile .lbx-content {
-    background: transparent;
+    background: #070b11;
+}
+/* Override Gumby: .tab-contents / .tab-buttons use light #eee — force dark profile chrome */
+.lbx-profile .tgc-profile-root.tgc-profile-body {
+    background-color: #070b11;
+    color: #e8f2fc;
+}
+.lbx-profile .tgc-profile-body > .tgc-profile-tabs {
+    float: none;
+    width: calc(100% + 44px);
+    max-width: none;
+    margin: -18px -22px 18px -22px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #0e1622 0%, #0a1018 100%);
+    border-bottom: 1px solid rgba(126, 200, 255, 0.22);
+}
+.lbx-profile .tgc-profile-tabs a {
+    float: none !important;
+    display: inline-block !important;
+    width: auto !important;
+    min-width: 140px;
+    margin: 0 6px 0 0 !important;
+    padding: 12px 20px !important;
+    border-radius: 8px 8px 0 0 !important;
+    background-color: #152030 !important;
+    background-image: none !important;
+    color: #d0e4fc !important;
+    font-size: 11px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-bottom: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.lbx-profile .tgc-profile-tabs a:hover {
+    color: #ffffff !important;
+    background-color: #1c2c40 !important;
+}
+.lbx-profile .tgc-profile-tabs a.tab-selected {
+    background-color: #243652 !important;
+    color: #ffffff !important;
+    border-color: rgba(126, 200, 255, 0.35) !important;
+    border-bottom: 3px solid #7ec8ff !important;
+    margin-bottom: -2px !important;
+    text-shadow: 0 0 14px rgba(126, 200, 255, 0.45);
+}
+.lbx-profile .tgc-profile-body > .tab-contents {
+    background-color: #070b11 !important;
+    background-image: none !important;
+    color: #e8f2fc !important;
 }
 .lbx-profile .tgc-profile-body {
     padding: 18px 22px 24px;
     max-height: calc(88vh - 90px);
     overflow-y: auto;
-    color: #b8c8d8;
+    color: #d8e6f4;
     font-size: 13px;
 }
 .lbx-profile .tgc-profile-user {
@@ -1607,10 +1674,10 @@ body.class-policy-privacy-page p {
     text-shadow: 0 0 24px rgba(126, 200, 255, 0.2);
 }
 .lbx-profile .tgc-profile-cloud {
-    font-size: 12px;
-    color: #7e95ab;
+    font-size: 13px;
+    color: #b8d2f0;
     margin: 8px 0 0;
-    line-height: 1.45;
+    line-height: 1.5;
 }
 .lbx-profile .tgc-profile-stats {
     display: flex;
@@ -1619,25 +1686,26 @@ body.class-policy-privacy-page p {
     margin-bottom: 18px;
 }
 .lbx-profile .tgc-stat {
-    background: rgba(4, 8, 14, 0.55);
-    padding: 11px 14px;
+    background: linear-gradient(145deg, #121c2c 0%, #0a121c 100%);
+    padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(126, 200, 255, 0.1);
+    border: 1px solid rgba(126, 200, 255, 0.22);
     min-width: 120px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .lbx-profile .tgc-stat__label {
     display: block;
-    font-size: 9px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #5c6f82;
+    letter-spacing: 0.12em;
+    color: #b0c8e4;
 }
 .lbx-profile .tgc-stat__val {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 600;
-    color: #e0e396;
+    color: #ffe566;
     font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 20px rgba(255, 220, 100, 0.25);
 }
 .lbx-profile .tgc-profile-share {
     display: flex;
@@ -1673,11 +1741,11 @@ body.class-policy-privacy-page p {
     color: #ffd0d8;
 }
 .lbx-profile .tgc-ach-heading {
-    font-size: 10px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.14em;
     margin: 4px 0 14px;
-    color: #6b8cad;
+    color: #9ec8f0;
 }
 .lbx-profile .tgc-ach-grid {
     display: grid;
@@ -1707,31 +1775,9 @@ body.class-policy-privacy-page p {
     line-height: 1.25;
 }
 .lbx-profile .tgc-ach-tile__desc {
-    font-size: 9px;
-    line-height: 1.35;
-    color: #8a9bab;
-}
-
-.lbx-profile .tgc-profile-tabs {
-    margin-bottom: 18px;
-    border-bottom: 1px solid rgba(126, 200, 255, 0.12);
-}
-.lbx-profile .tgc-profile-tabs a {
-    display: inline-block;
-    padding: 11px 18px;
-    margin-right: 2px;
-    color: #5a6a7c;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    transition: color 0.15s ease;
-}
-.lbx-profile .tgc-profile-tabs a.tab-selected {
-    color: #9fd8ff;
-    border-bottom: 2px solid #7ec8ff;
-    margin-bottom: -1px;
-    text-shadow: 0 0 16px rgba(126, 200, 255, 0.35);
+    font-size: 10px;
+    line-height: 1.4;
+    color: #b4c8dc;
 }
 .lbx-profile .tgc-lb-live {
     font-size: 11px;
@@ -1755,8 +1801,8 @@ body.class-policy-privacy-page p {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #6b7f94;
-    background: rgba(0, 0, 0, 0.25);
+    color: #c0d4ec;
+    background: rgba(0, 0, 0, 0.35);
 }
 .lbx-profile .tgc-lb-grid th:last-child,
 .lbx-profile .tgc-lb-grid td:last-child {
@@ -1778,6 +1824,10 @@ body.class-policy-privacy-page p {
         max-width: none;
         max-height: calc(100vh - 20px);
         max-height: calc(100dvh - 20px);
+    }
+    .lbx-profile .tgc-profile-body > .tgc-profile-tabs {
+        width: calc(100% + 28px);
+        margin: -18px -14px 18px -14px;
     }
     .lbx-profile .tgc-profile-body {
         padding-left: max(14px, env(safe-area-inset-left));

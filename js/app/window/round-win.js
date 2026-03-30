@@ -114,11 +114,7 @@ function(WindowBase, utilsNumber, i18, WindowEpisodeWin, core, player) {
                 ]},
                 {tag: 'div', className: 'row buttons', childs: [
                     {tag: 'div', className: 'medium primary btn', childs: [
-                        {tag: 'a', html: i18._('round-win-retry'), 
-                            events: [{click: $.proxy(this.onClickRetryButton, this)}]}
-                    ]},
-                    {tag: 'div', className: 'medium secondary btn', childs: [
-                        {tag: 'a', html: i18._('round-win-next-round'), 
+                        {tag: 'a', html: i18._('round-win-next-round'),
                             events: [{click: $.proxy(this.onClickNextRoundButton, this)}]}
                     ]}
                 ]}
@@ -181,14 +177,6 @@ function(WindowBase, utilsNumber, i18, WindowEpisodeWin, core, player) {
     RoundWin.prototype.onClickNewGame = function() {};
 
     /**
-     * @method onClickRetryButton
-     */
-    RoundWin.prototype.onClickRetryButton = function() {
-        this.close();
-        this.emit('retryRound');
-    };
-    
-    /**
      * @method onClickNextRoundButton
      */
     RoundWin.prototype.onClickNextRoundButton = function() {
@@ -214,7 +202,7 @@ function(WindowBase, utilsNumber, i18, WindowEpisodeWin, core, player) {
         this.content.find('table #win-lives').text(_data.lives);
         
         if ( this.options.round >= this.options.maxRound ) {
-            this.content.find('.buttons .secondary a').text(i18._('round-win-select-episode'));
+            this.content.find('.buttons .primary a').text(i18._('round-win-select-episode'));
         }
         chain = [];
 

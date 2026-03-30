@@ -106,7 +106,6 @@ function() {
         // round-win window
         'round-win-header': 'Win stats',
         'round-win-episode': 'Episode',
-        'round-win-retry': 'Retry round',
         'round-win-next-round': 'Choose level',
         'round-win-select-episode': 'Select episode',
         'round-win.share-title': 'Next level in TGC-Arkade',

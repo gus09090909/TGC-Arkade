@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
 
     /** Bump when you need browsers to fetch fresh dist/common.css + dist/output.min.js */
-    var HTML_ASSET_VERSION = '6';
+    var HTML_ASSET_VERSION = '7';
 
     var banner = 
         '/*! \n' +

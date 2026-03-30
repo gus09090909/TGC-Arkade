@@ -8,6 +8,7 @@ define('app/tgc-welcome', ['app/tgc-profile', 'app/i18/_', 'app/tgc-cloud'], fun
         var html = [
             '<div id="tgc-welcome" class="tgc-welcome" role="dialog" aria-modal="true">',
             '<div class="tgc-welcome__backdrop" aria-hidden="true"></div>',
+            '<div class="tgc-welcome__photo" aria-hidden="true" style="background-image:url(\'', SS, 'images/tgc-welcome-bg.png\')"></div>',
             '<div class="tgc-welcome__vignette" aria-hidden="true"></div>',
             '<div class="tgc-welcome__panel">',
             '<div class="tgc-welcome__hero">',
