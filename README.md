@@ -48,9 +48,14 @@ npm start
 
 Abre **http://localhost:3847/** (el puerto lo define `PORT` o por defecto 3847).
 
-### GitHub Pages
+### GitHub Pages (`https://TU-USUARIO.github.io/TGC-Arkade/`)
 
-GitHub Pages **solo sirve archivos estáticos**; no ejecuta Node. **No** sirve para este proyecto completo (hace falta la API). Usa Render, Railway, Fly.io u otro hosting con Node.
+Pages **no ejecuta Node**: el HTML/CSS/JS del juego se sirve desde el repo, pero la **API tiene que estar en otro sitio** (por defecto el juego en `github.io` llama a **`https://tgc-arkade.onrender.com`**). Por eso:
+
+1. Despliega antes la API en **Render** (o cambia la URL en `js/_config_prod.js` en la línea que detecta `github.io`).
+2. En el repo deben existir **`dist/`** y **`bower_components/`** (ya no están en `.gitignore`) tras `grunt build` y `bower install`, y subirlos con `git push` para que Pages no quede en blanco.
+
+Si quieres **un solo enlace** sin depender de dos sitios, usa solo **Render** y no hace falta Pages.
 
 ---
 

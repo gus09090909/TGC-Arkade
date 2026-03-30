@@ -1,6 +1,6 @@
 .idea
 node_modules/
-bower_components/
 .DS_Store
 .DS_Store/
-dist/
+# dist/ y bower_components/ se versionan para que GitHub Pages pueda servir el juego.
+# (Si prefieres no subirlos, usa solo Render u otro hosting con build en CI.)
