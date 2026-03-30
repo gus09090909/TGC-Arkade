@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628"/>
+      <stop offset="100%" style="stop-color:#1a3a5c"/>
+    </linearGradient>
+    <linearGradient id="brick" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a7ab0"/>
+      <stop offset="100%" style="stop-color:#2d4d73"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="200" fill="url(#bg)"/>
+  <text x="160" y="36" text-anchor="middle" fill="#e0e396" font-family="Segoe UI, sans-serif" font-size="15" font-weight="600">TGC-Arkade</text>
+  <text x="160" y="56" text-anchor="middle" fill="#7ec8ff" font-family="Segoe UI, sans-serif" font-size="11">Round 1</text>
+  <g transform="translate(40,72)">
+    <rect x="0" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+    <rect x="40" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+    <rect x="80" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+    <rect x="120" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+    <rect x="160" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+    <rect x="200" y="0" width="36" height="18" rx="2" fill="url(#brick)" stroke="#6a9fd4" stroke-width="1"/>
+  </g>
+  <rect x="120" y="150" width="80" height="14" rx="4" fill="#3d5a80" stroke="#7ec8ff" stroke-width="1"/>
+  <circle cx="160" cy="128" r="9" fill="#ffd54a" stroke="#fff8dc" stroke-width="1.5"/>
+  <text x="160" y="188" text-anchor="middle" fill="#8899aa" font-family="Segoe UI, sans-serif" font-size="10">The Giveaways Club</text>
+</svg>

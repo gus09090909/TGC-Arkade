@@ -219,9 +219,11 @@ function(WindowBase, core, gameOptions, i18, tgcProfile, tgcSession) {
             if ( played && unlocked ) {
                 cls += ' tgc-round-played-session';
             }
-            levelPreview = SS + 'images/games/' + this.options.game + 
-                                        '/' + i + (core.helperApp.pixelRatio() >= 2 ? '@2x' : '') + '.jpg';
-            lockPreview = SS + 'images/games/locked' + (core.helperApp.pixelRatio() >= 2 ? '@2x' : '') + '.jpg';
+            // Round 1: dedicated art (round-first.svg). Rounds 2+ keep legacy filenames 1.jpg, 2.jpg…
+            // (index 0 → first image; index i≥1 → i.jpg so previews stay aligned when levels are prepended.)
+            levelPreview = SS + 'images/games/' + this.options.game + '/' +
+                (i === 0 ? 'round-first.svg' : (i + '.jpg')) + (typeof REVISION !== 'undefined' ? REVISION : '');
+            lockPreview = SS + 'images/games/locked.jpg' + (typeof REVISION !== 'undefined' ? REVISION : '');
             model.childs.push(
                 {tag: 'li', childs: [
                     {tag: 'a', 'data-id': i,

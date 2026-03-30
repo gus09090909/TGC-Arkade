@@ -134,6 +134,15 @@ define('app/tgc-profile', ['app/core/_', 'app/tgc-cloud'], function(core, tgcClo
     }
 
     /**
+     * Clear local session (nickname memory + profile shell). Use before reload / welcome screen.
+     */
+    function logoutSession() {
+        clearRememberedUsername();
+        data = defaultData('');
+        persistLocalEvent();
+    }
+
+    /**
      * Register or load profile from cloud only (no localStorage for game data).
      */
     function setUsername(name, callback) {
@@ -267,6 +276,7 @@ define('app/tgc-profile', ['app/core/_', 'app/tgc-cloud'], function(core, tgcClo
         schedulePush: schedulePush,
         flushPlayBuffer: flushPlayBuffer,
         clearRememberedUsername: clearRememberedUsername,
-        readRememberedUsername: readRememberedUsername
+        readRememberedUsername: readRememberedUsername,
+        logoutSession: logoutSession
     };
 });

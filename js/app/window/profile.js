@@ -37,15 +37,18 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
 
     Profile.prototype.model = function() {
         return {
-            tag: 'div', className: 'tgc-profile-root', childs: [
+            tag: 'div', className: 'tgc-profile-root tgc-profile-body', childs: [
                 {tag: 'div', className: 'tab-buttons tgc-profile-tabs', childs: [
                     {tag: 'a', href: '#', html: i18._('tgc-tab-profile'), className: 'tab-selected'},
                     {tag: 'a', href: '#', html: i18._('tgc-tab-leaderboard')}
                 ]},
                 {tag: 'div', className: 'tab-contents tgc-prof-pane', styles: {display: 'block'}, childs: [
                     {tag: 'div', className: 'tgc-profile-user', childs: [
-                        {tag: 'div', className: 'tgc-profile-name', id: 'tgc-profile-name', html: '—'},
-                        {tag: 'p', className: 'tgc-profile-cloud', id: 'tgc-profile-cloud', html: ''}
+                        {tag: 'div', className: 'tgc-profile-avatar', html: '👤'},
+                        {tag: 'div', className: 'tgc-profile-user-text', childs: [
+                            {tag: 'div', className: 'tgc-profile-name', id: 'tgc-profile-name', html: '—'},
+                            {tag: 'p', className: 'tgc-profile-cloud', id: 'tgc-profile-cloud', html: ''}
+                        ]}
                     ]},
                     {tag: 'div', className: 'tgc-profile-stats row', childs: [
                         {tag: 'div', className: 'tgc-stat', childs: [
@@ -67,7 +70,8 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
                     ]},
                     {tag: 'div', className: 'tgc-profile-share', childs: [
                         {tag: 'button', type: 'button', className: 'tgc-btn tgc-btn--secondary', id: 'tgc-profile-copy', html: i18._('tgc-profile-copy-link')},
-                        {tag: 'button', type: 'button', className: 'tgc-btn', id: 'tgc-profile-sync', html: i18._('tgc-profile-sync-now')}
+                        {tag: 'button', type: 'button', className: 'tgc-btn', id: 'tgc-profile-sync', html: i18._('tgc-profile-sync-now')},
+                        {tag: 'button', type: 'button', className: 'tgc-btn tgc-btn--danger', id: 'tgc-profile-logout', html: i18._('tgc-profile-logout')}
                     ]},
                     {tag: 'h3', className: 'tgc-ach-heading', html: i18._('tgc-profile-achievements')},
                     {tag: 'div', className: 'tgc-ach-grid', id: 'tgc-ach-grid'}
@@ -113,11 +117,14 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
             var has = !!unlocked[def.id];
             var $tile = $('<div class="tgc-ach-tile"></div>');
             $tile.toggleClass('tgc-ach-tile--locked', !has);
+            var txt = tgcAchievements.formatAchievementStrings(def, i18);
             $tile.html(
                 '<div class="tgc-ach-tile__icon">' + def.icon + '</div>' +
-                '<div class="tgc-ach-tile__title">' + i18._('tgc-ach-' + def.id + '-title') + '</div>' +
-                '<div class="tgc-ach-tile__desc">' + i18._('tgc-ach-' + def.id + '-desc') + '</div>'
+                '<div class="tgc-ach-tile__title"></div>' +
+                '<div class="tgc-ach-tile__desc"></div>'
             );
+            $tile.find('.tgc-ach-tile__title').text(txt.title);
+            $tile.find('.tgc-ach-tile__desc').text(txt.desc);
             $grid.append($tile);
         }
 
@@ -139,6 +146,14 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
                 }, 450);
             });
             tgcProfile.schedulePush();
+        });
+        $c.find('#tgc-profile-logout').off('click').on('click', function() {
+            if ( !window.confirm(i18._('tgc-profile-logout-confirm')) ) {
+                return;
+            }
+            _this.close();
+            tgcProfile.logoutSession();
+            window.location.reload();
         });
     };
 

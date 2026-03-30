@@ -1,19 +1,41 @@
 
-define('app/tgc-achievements', ['app/i18/_', 'app/tgc-toast'], function(i18, tgcToast) {
+define('app/tgc-achievements', ['app/i18/_', 'app/tgc-toast', 'app/episodes/space/levels'], function(i18, tgcToast, spaceLevelsFn) {
 
     function runScore(d) {
         var s = d.stats || {};
         return Math.max(s.bestSessionScore | 0, s.highScore | 0);
     }
 
+    var LEVEL_COUNT = 40;
+    try {
+        LEVEL_COUNT = spaceLevelsFn().length;
+    } catch (e) {
+        LEVEL_COUNT = 40;
+    }
+
+    function levelBeatCheck(n) {
+        return function(d) {
+            return (d.stats.maxLevelBeat | 0) >= n;
+        };
+    }
+
     var DEFS = [
-        {id: 'cadet_joined', icon: '🚀', check: function(d) { return !!d.username; }},
-        {id: 'pilot_certificate', icon: '🛸', check: function(d) { return d.stats.maxLevelBeat >= 1; }},
-        {id: 'five_star_tourist', icon: '⭐', check: function(d) { return d.stats.maxLevelBeat >= 5; }},
-        {id: 'deep_space_ten', icon: '🌌', check: function(d) { return d.stats.maxLevelBeat >= 10; }},
-        {id: 'tgc_legend', icon: '👑', check: function(d, ctx) {
-            var max = ctx && ctx.levelCount ? ctx.levelCount : 99;
-            return d.stats.maxLevelBeat >= max;
+        {id: 'cadet_joined', icon: '🚀', check: function(d) { return !!d.username; }}
+    ];
+
+    var L, icons = ['🎯', '🎮', '⭐', '🛸', '🌟'];
+    for ( L = 1; L <= LEVEL_COUNT; L++ ) {
+        DEFS.push({
+            id: 'lvl_beat_' + L,
+            levelBeat: L,
+            icon: icons[L % icons.length],
+            check: levelBeatCheck(L)
+        });
+    }
+
+    DEFS.push(
+        {id: 'tgc_legend', icon: '👑', check: function(d) {
+            return (d.stats.maxLevelBeat | 0) >= LEVEL_COUNT;
         }},
         {id: 'point_collector_10k', icon: '💰', check: function(d) { return runScore(d) >= 10000; }},
         {id: 'point_hoarder_50k', icon: '💎', check: function(d) { return runScore(d) >= 50000; }},
@@ -25,7 +47,21 @@ define('app/tgc-achievements', ['app/i18/_', 'app/tgc-toast'], function(i18, tgc
         {id: 'marathon_1h', icon: '🕐', check: function(d) { return d.stats.playTimeMs >= 3600000; }},
         {id: 'lightning_round', icon: '⚡', check: function(d) { return d.stats.fastestRoundSec > 0 && d.stats.fastestRoundSec <= 45; }},
         {id: 'full_health_win', icon: '❤️', check: function(d) { return d.stats.fullLivesWins >= 1; }}
-    ];
+    );
+
+    function formatAchievementStrings(def, i18Ref) {
+        var ii = i18Ref || i18;
+        if ( def.levelBeat ) {
+            return {
+                title: ii._('tgc-ach-lvl_beat-title').replace(/\{n\}/g, String(def.levelBeat)),
+                desc: ii._('tgc-ach-lvl_beat-desc').replace(/\{n\}/g, String(def.levelBeat))
+            };
+        }
+        return {
+            title: ii._('tgc-ach-' + def.id + '-title'),
+            desc: ii._('tgc-ach-' + def.id + '-desc')
+        };
+    }
 
     function getDef(id) {
         for ( var i = 0; i < DEFS.length; i++ ) {
@@ -62,12 +98,8 @@ define('app/tgc-achievements', ['app/i18/_', 'app/tgc-toast'], function(i18, tgc
     }
 
     function notifyUnlock(def) {
-        tgcToast.showAchievement(
-            def.id,
-            i18._('tgc-ach-' + def.id + '-title'),
-            i18._('tgc-ach-' + def.id + '-desc'),
-            def.icon
-        );
+        var s = formatAchievementStrings(def, i18);
+        tgcToast.showAchievement(def.id, s.title, s.desc, def.icon);
     }
 
     return {
@@ -75,6 +107,8 @@ define('app/tgc-achievements', ['app/i18/_', 'app/tgc-toast'], function(i18, tgc
         getDef: getDef,
         listDefs: listDefs,
         evaluate: evaluate,
-        notifyUnlock: notifyUnlock
+        notifyUnlock: notifyUnlock,
+        formatAchievementStrings: formatAchievementStrings,
+        getLevelAchievementCount: function() { return LEVEL_COUNT; }
     };
 });

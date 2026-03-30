@@ -178,6 +178,7 @@ function(core, dashboard, preloader, episode, i18, tgcProfile) {
         this.stage.addChild(this.auth.entity);
 
         $.each(episode.getManifest().dashboard.buttons, function(i, obj) {
+            var r = core.helperApp.pixelRatio();
             var o = new createjs[obj.type]();
             
             if ( obj.type == 'Bitmap' ) {
@@ -195,7 +196,22 @@ function(core, dashboard, preloader, episode, i18, tgcProfile) {
                 }
                 o[key] = value;
             });
-            _this.stage.addChild(o);
+            if ( obj.event === 'clickUser' && obj.type === 'Bitmap' ) {
+                var sc = 1.5;
+                o.scaleX = o.scaleY = sc;
+                var iw = (o.image && o.image.width) ? o.image.width : 28;
+                var ih = (o.image && o.image.height) ? o.image.height : 28;
+                var ph = new createjs.Text(i18._('tgc-dashboard-profile-label'), Math.round(12 * r) + 'px Quantico, sans-serif', '#c5dff5');
+                ph.x = obj.x + iw * sc + 6 * r;
+                ph.y = obj.y + Math.max(0, (ih * sc - 14 * r) / 2);
+                ph.addEventListener('click', function() {
+                    _this.emit('clickUser');
+                });
+                _this.stage.addChild(o);
+                _this.stage.addChild(ph);
+            } else {
+                _this.stage.addChild(o);
+            }
         });
         
         // @todo
