@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
 
     /** Bump when you need browsers to fetch fresh dist/common.css + dist/output.min.js */
-    var HTML_ASSET_VERSION = '3';
+    var HTML_ASSET_VERSION = '6';
 
     var banner = 
         '/*! \n' +
@@ -130,7 +130,6 @@ module.exports = function(grunt) {
                     'js/app/episodes/_.js',
                     // i18
                     'js/app/i18/languages/en-us.js',
-                    'js/app/i18/languages/pl.js',
                     'js/app/i18/i18.js',
                     'js/app/i18/_.js',
                     // input
@@ -143,7 +142,6 @@ module.exports = function(grunt) {
                     'js/app/window/auth.js',
                     'js/app/window/confirm.js',
                     'js/app/window/episode-win.js',
-                    'js/app/window/first-time.js',
                     'js/app/window/games.js',
                     'js/app/window/help.js',
                     'js/app/window/options.js',

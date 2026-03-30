@@ -12,9 +12,9 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
         this.showOverlay = true;
         this.options = $.extend({
             music: 'on',
-            sound: 'on',
-            lang: 'en-us'
+            sound: 'on'
         }, gameOptions.get('window-' + this.name) || {});
+        delete this.options.lang;
         this.options.cookieInfo = true;
         this.fps = this.options.fps;
         this.initialize();
@@ -40,17 +40,7 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
     Options.prototype.model = function() {
         return {
             tag: 'div', className: 'options-window', childs: [
-                {tag: 'div', className: 'tab-buttons', childs: [
-                        core.helperApp.platform() == 'wp8' ? {} : {tag: 'a', href: '#', html: i18._('options-settings'), className: 'tab-selected'},
-                        {tag: 'a', href: '#', html: i18._('options-languages')}
-                    ]
-                },
-                core.helperApp.platform() == 'wp8' ? {} : {tag: 'div', className: 'tab-contents', styles: {display: 'block'},
-                    childs: [/** **/]
-                },
-                {tag: 'div', className: 'tab-contents', styles: {display: 'none'},
-                    childs: [/** **/]
-                }
+                {tag: 'div', className: 'tab-contents', styles: {display: 'block'}, childs: []}
             ]
         };
     };
@@ -101,18 +91,6 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
         
         return list;
     }());
-    
-    /**
-     * @property languages
-     * @type {Array}
-     */
-    Options.prototype.languages = [
-        {type: 'radio', id: 'lang', items: [
-                {name: function() {return i18._('lang-full-name:en-us');}, value: 'en-us'},
-                {name: function() {return i18._('lang-full-name:pl');}, value: 'pl'}
-            ]
-        }
-    ];
     
     Options.prototype.initialize = function(options) {
         WindowBase.prototype.initialize.call(this, options);
@@ -180,14 +158,8 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
         action = clicked.attr('data-item').split('|')[0];
         this.emit('change', [action, value]);
 
-        if ( (action == 'lang' && i18.getLanguageCode() != value) || 
-                (action == 'fps' && this.fps != value) ) {
-            
-            if ( action == 'lang' ) {
-                confirmBody = i18._('confirm-change-language').replace('{lang}', i18._('lang-full-name:' + value));
-            } else {
-                confirmBody = i18._('confirm-change-fps').replace('{fps}', value.toUpperCase());
-            }
+        if ( action == 'fps' && this.fps != value ) {
+            confirmBody = i18._('confirm-change-fps').replace('{fps}', value.toUpperCase());
 
             if ( core.helperBrowser.isMobile ) {
                 if ( window.confirm(core.utilsString.stripTags(confirmBody)) ) {
@@ -218,40 +190,7 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
     Options.prototype._buildHtml = function() {
         var model, className;
 
-        // main options
-        if ( core.helperApp.platform() != 'wp8' ) {
-            $.each(this.main, $.proxy(function(i, type) {
-                model = {tag: 'div', className: 'option-item ' + type.type, childs: []};
-
-                if ( type.type == 'label' ) {
-                    model.childs.push({tag: 'div', className: 'header-label', html: type.value()});
-                } else {
-                    $.each(type.items, $.proxy(function(j, item) {
-                        item.value = item.value ? item.value : '';
-
-                        if ( type.type == 'checkbox' ) {
-                            className = this.options[type.id] ? 'selected' : '';
-                        } else {
-                            className = this.options[type.id] == item.value ? 'selected' : '';
-                        }
-
-                        var subM = {tag: 'a', 'data-item': type.id + '|' + item.value,
-                            className: 'option-item-entry ' + className, html: item.name(), 
-                            events: [{click: $.proxy(this.onOptionClick, this)}]};
-
-                        model.childs.push(subM);
-                    }, this));
-
-                    if ( type.label ) {
-                        model.childs.push({tag: 'div', className: 'label', html: type.label()});
-                    }
-                }
-                this.workingModel.childs[1].childs.push(model);
-            }, this));
-        }
-
-        // languages
-        $.each(this.languages, $.proxy(function(i, type) {
+        $.each(this.main, $.proxy(function(i, type) {
             model = {tag: 'div', className: 'option-item ' + type.type, childs: []};
 
             if ( type.type == 'label' ) {
@@ -259,7 +198,7 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
             } else {
                 $.each(type.items, $.proxy(function(j, item) {
                     item.value = item.value ? item.value : '';
-                    
+
                     if ( type.type == 'checkbox' ) {
                         className = this.options[type.id] ? 'selected' : '';
                     } else {
@@ -267,7 +206,7 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
                     }
 
                     var subM = {tag: 'a', 'data-item': type.id + '|' + item.value,
-                        className: 'option-item-entry ' + className, html: item.name(), 
+                        className: 'option-item-entry ' + className, html: item.name(),
                         events: [{click: $.proxy(this.onOptionClick, this)}]};
 
                     model.childs.push(subM);
@@ -277,17 +216,10 @@ function(WindowBase, WindowConfirm, core, gameOptions, i18) {
                     model.childs.push({tag: 'div', className: 'label', html: type.label()});
                 }
             }
-            this.workingModel.childs[2].childs.push(model);
+            this.workingModel.childs[0].childs.push(model);
         }, this));
 
         WindowBase.prototype._buildHtml.call(this);
-        
-        new core.Tab({
-            buttons: this.content.find('.tab-buttons a'),
-            contents: this.content.find('.tab-contents'),
-            active_tab_class: 'tab-selected',
-            default_tab: 0
-        });
     };
     
     return Options;

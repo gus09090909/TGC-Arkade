@@ -100,7 +100,6 @@ function() {
         // options window
         'options-header': 'Options',
         'options-settings': 'Settings',
-        'options-languages': 'Language',
         'options-music': 'Music',
         'options-sounds': 'Sounds',
         'options-fps': 'Number of frames per second',
@@ -158,31 +157,7 @@ function() {
         'dashboard-auth-unlogged': '',
         'alert-title': 'Alert',
         'confirm-title': 'Confirm',
-        'confirm-change-language': 'You have changed the language to <strong>{lang}</strong> to show changes it is required to refresh page. Do you want to do it now?',
         'confirm-change-fps': 'You have changed frames per second to <strong>{fps}FPS</strong> to show changes it is required to refresh page. Do you want to do it now?',
-        // first time window
-        'first-time-slide-1-title': 'Tip #1: Handling menu',
-        'first-time-slide-1-desc': 'By using navigation buttons you can log in to your account or create new one, change settings or choose your favorite level and start the game.',
-        'first-time-slide-1-desc-list': [
-            'Login/Signup', 
-            'Choose episode or game level', 
-            'Game settings', 
-            'Game rules'
-        ],
-        'first-time-slide-2-title': 'Tip #2: Game progress',
-        'first-time-slide-2-desc': 'If you are in the game you would definitely need some information about it. Now you should know how many rounds are left, how many lives you have and how many points you gained.',
-        'first-time-slide-2-desc-list': [
-            'Lives left', 
-            'Current level', 
-            'Level time duration', 
-            'Current ball speed',
-            'Your points'
-        ],
-        'first-time-slide-3-title': 'Tip #3: Controls',
-        'first-time-slide-3-desc': 'Your goal is to keep your ball in the air as long as you can. Win points, pick bonuses and become number one on Game Rating.',
-        'first-time-slide-3-desc-list': [
-            'You can move paddle with your mouse, your touchpad or by keyboard (<strong>left</strong> arrow and <strong>right</strong> arrow). You can also use <strong>space</strong>, <strong>enter</strong> or <strong>left mouse button (LMB)</strong> to release ball.'
-        ],
         // levels-editor page
         'le-header': 'Levels Editor',
         'le-episodes-header': 'Episodes:',
@@ -190,12 +165,13 @@ function() {
         'le-interactive-blocks-header': 'Objects:',
         'le-clear-confirm': 'For sure you want to clear the level?',
         'le-share-title': 'My level in TGC-Arkade :)',
-        'tgc-welcome-tagline': 'The Giveaways Club — break bricks, chase high scores, unlock silly achievements.',
-        'tgc-welcome-username-label': 'Player name',
-        'tgc-welcome-placeholder': 'Your nickname',
-        'tgc-welcome-hint': '2–24 letters, numbers or spaces. All progress is stored on the game server (configure TGC_CLOUD_SYNC_URL).',
+        'tgc-welcome-badge': 'The Giveaways Club presents',
+        'tgc-welcome-tagline': 'Classic brick-breaking. Online scores. Achievements that bite back.',
+        'tgc-welcome-hook': 'Pick your callsign and step into the neon lane.',
+        'tgc-welcome-username-label': 'Your callsign',
+        'tgc-welcome-placeholder': 'e.g. StarPilot',
         'tgc-welcome-no-cloud': 'Cloud API is not configured. Set TGC_CLOUD_SYNC_URL in js/_config_dev.js (e.g. http://localhost:3847) and run the server in the /server folder (npm install && npm start).',
-        'tgc-welcome-play': 'Enter the arcade',
+        'tgc-welcome-play': 'Play now',
         'tgc-toast-achievement-label': 'Achievement unlocked',
         'tgc-profile-header': 'Profile',
         'tgc-stat-playtime': 'Time played',

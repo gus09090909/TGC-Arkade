@@ -1,10 +1,8 @@
 
 define('app/i18/_', [
-    'app/i18/languages/en-us',
-    'app/i18/languages/pl',
     'app/i18/i18'
 ], 
-function(enUs, pl, i18) {
+function(i18) {
 
     return {
         _: i18._,

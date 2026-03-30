@@ -40,12 +40,8 @@ function(core, episode) {
             'window-options': {
                 music: 'on',
                 sound: 'on',
-                lang: null,
                 fps: _FPS,
                 cookieInfo: false
-            },
-            'window-first-time': {
-                needToShow: true
             },
             'window-rounds': {
                 'data': []
@@ -80,6 +76,10 @@ function(core, episode) {
 //        }
         this.storage.get().then($.proxy(function(data) {
             _options = $.extend(_defaults, JSON.parse(data || '{}'));
+            delete _options['window-first-time'];
+            if ( _options['window-options'] ) {
+                delete _options['window-options'].lang;
+            }
             this.emit('loaded');
         }, this));
     }

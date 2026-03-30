@@ -49,7 +49,6 @@ function(stage,
         preloader.load();
         
         // auth window disabled in this build
-        this.windowFirstTime = new _window.FirstTime();
         this.windowGames = new _window.Games();
         this.windowHelp = new _window.Help();
         this.windowOptions = new _window.Options();
@@ -79,7 +78,6 @@ function(stage,
             d.bind('webkitvisibilitychange', $.proxy(this.onWindowVisibilityChange, this));
         }
         $('#' + stage.stage.canvas.id).bind('click', $.proxy(this.onStageClick, this));
-        this.windowFirstTime.addListener('close', $.proxy(this.onWindowFirstTimeClose, this));
         this.windowGames.addListener('selectEpisode', $.proxy(this.onWindowGamesSelectEpisode, this));
         this.windowRounds.addListener('back', $.proxy(this.onWindowRoundsBack, this));
         this.windowRounds.addListener('play', $.proxy(this.onWindowRoundsPlayGame, this));
@@ -495,18 +493,6 @@ function(stage,
         });
     };
 
-    // WindowFirstTime
-
-    /**
-     * @method onWindowFirstTimeClose
-     */
-    Game.prototype.onWindowFirstTimeClose = function() {
-        this.windowRounds.open({
-            game: episode.getName(),
-            levels: levels.getLevelNames()
-        });
-    };
-    
     /**
      * @method onPreloaderComplete
      */
@@ -546,11 +532,6 @@ function(stage,
                 location.hash = '';
                 this.windowHelp.open();
                 this.windowHelp.tab.changeTab(1);
-
-            } else if ( gameOptions.get('window-games:game') == 'space' && gameOptions.get('window-first-time:needToShow') 
-                    && $(window).width() >= 560 ) {
-                this.windowFirstTime.open();
-                gameOptions.set('window-first-time', {needToShow: false});
 
             } else if ( gameOptions.get('window-games').showOnStartup && !this.isGameLoaded && EPISODES.length > 1 ) {
                 this.windowGames.open();

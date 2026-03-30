@@ -214,33 +214,3 @@
 .lbx-preloader-indicator .body-cont {
     font-size: 17px !important;
 }
-
-/** first-time **/
-.lbx-first-time {
-    height: 372px;
-    
-}
-.lbx-first-time .lbx-header {
-    font-size: 13px;
-}
-.lbx-first-time .tab-contents {
-    height: 328px;
-}
-.lbx-first-time .body-cont {
-    padding: 5px 0;
-}
-.lbx-first-time .slide-1 .slide-body p.list {
-    padding-top: 6px;
-}
-.lbx-first-time .slide-2 .slide-body p.list {
-    padding-top: 3px;
-}
-.lbx-first-time .slide-2 .slide-desc {
-    padding-bottom: 12px;
-}
-.lbx-first-time .slide-3 .slide-image {
-    padding: 36px 0 0 9px;
-}
-.lbx-first-time .slide-3 .slide-body {
-    padding: 27px 15px 0 10px;
-}
