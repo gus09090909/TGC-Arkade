@@ -36,18 +36,50 @@ define('app/tgc-profile', ['app/core/_', 'app/tgc-cloud'], function(core, tgcClo
         if ( !raw || typeof raw !== 'object' ) {
             return;
         }
-        data = defaultData(raw.username || data && data.username || '');
-        data.username = raw.username || data.username;
-        data.maxUnlockedLevelIndex = raw.maxUnlockedLevelIndex | 0;
+        var prev = data;
+        var prevUser = (prev && prev.username) || '';
+        data = defaultData(raw.username || prevUser);
+        data.username = (raw.username || prevUser || '').trim() || data.username;
+        var ps = prev && prev.stats ? prev.stats : emptyStats();
+        var cs = $.extend(emptyStats(), raw.stats || {});
+        data.maxUnlockedLevelIndex = Math.max(prev ? (prev.maxUnlockedLevelIndex | 0) : 0, (raw.maxUnlockedLevelIndex | 0));
         if ( data.maxUnlockedLevelIndex < 0 ) {
             data.maxUnlockedLevelIndex = 0;
         }
-        data.stats = $.extend(emptyStats(), raw.stats || {});
-        data.achievements = $.extend({}, raw.achievements || {});
-        data.cloudSyncedAt = raw.cloudSyncedAt || null;
+        var s = emptyStats();
+        s.playTimeMs = Math.max(ps.playTimeMs | 0, cs.playTimeMs | 0);
+        s.deaths = Math.max(ps.deaths | 0, cs.deaths | 0);
+        s.bestSessionScore = Math.max(ps.bestSessionScore | 0, cs.bestSessionScore | 0);
+        s.highScore = Math.max(ps.highScore | 0, cs.highScore | 0);
+        s.totalScore = Math.max(ps.totalScore | 0, cs.totalScore | 0);
+        s.roundsWon = Math.max(ps.roundsWon | 0, cs.roundsWon | 0);
+        s.maxLevelBeat = Math.max(ps.maxLevelBeat | 0, cs.maxLevelBeat | 0);
+        if ( cs.fastestRoundSec | 0 ) {
+            if ( !ps.fastestRoundSec || (cs.fastestRoundSec | 0) < (ps.fastestRoundSec | 0) ) {
+                s.fastestRoundSec = cs.fastestRoundSec | 0;
+            } else {
+                s.fastestRoundSec = ps.fastestRoundSec | 0;
+            }
+        } else {
+            s.fastestRoundSec = ps.fastestRoundSec | 0;
+        }
+        s.fullLivesWins = Math.max(ps.fullLivesWins | 0, cs.fullLivesWins | 0);
+        data.stats = s;
         if ( (data.stats.highScore | 0) < (data.stats.bestSessionScore | 0) ) {
             data.stats.highScore = data.stats.bestSessionScore | 0;
         }
+        var prevAch = prev && prev.achievements ? prev.achievements : {};
+        var mergedAch = $.extend({}, prevAch);
+        var incAch = raw.achievements || {};
+        Object.keys(incAch).forEach(function(k) {
+            var a = incAch[k];
+            var b = mergedAch[k];
+            if ( !b || (a | 0) < (b | 0) ) {
+                mergedAch[k] = a;
+            }
+        });
+        data.achievements = mergedAch;
+        data.cloudSyncedAt = raw.cloudSyncedAt || null;
     }
 
     function persistLocalEvent() {
@@ -225,7 +257,7 @@ define('app/tgc-profile', ['app/core/_', 'app/tgc-cloud'], function(core, tgcClo
         });
     }
 
-    function applyLevelWin(levelIndexZeroBased, levelScore, timeSec, livesLeft, maxLevelCount) {
+    function applyLevelWin(levelIndexZeroBased, levelScore, timeSec, livesLeft, maxLevelCount, sessionTotalScore) {
         var d = get();
         var s = d.stats;
         s.roundsWon = (s.roundsWon | 0) + 1;
@@ -234,6 +266,13 @@ define('app/tgc-profile', ['app/core/_', 'app/tgc-cloud'], function(core, tgcClo
             s.maxLevelBeat = beat;
         }
         s.totalScore = (s.totalScore | 0) + Math.max(0, levelScore | 0);
+        var run = sessionTotalScore | 0;
+        if ( run > (s.bestSessionScore | 0) ) {
+            s.bestSessionScore = run;
+        }
+        if ( run > (s.highScore | 0) ) {
+            s.highScore = run;
+        }
         var t = Math.max(1, timeSec | 0);
         if ( !s.fastestRoundSec || t < s.fastestRoundSec ) {
             s.fastestRoundSec = t;

@@ -56,6 +56,10 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
                             {tag: 'span', className: 'tgc-stat__val', id: 'tgc-stat-playtime', html: '0'}
                         ]},
                         {tag: 'div', className: 'tgc-stat', childs: [
+                            {tag: 'span', className: 'tgc-stat__label', html: i18._('tgc-stat-total-points')},
+                            {tag: 'span', className: 'tgc-stat__val', id: 'tgc-stat-totalscore', html: '0'}
+                        ]},
+                        {tag: 'div', className: 'tgc-stat', childs: [
                             {tag: 'span', className: 'tgc-stat__label', html: i18._('tgc-stat-best-run')},
                             {tag: 'span', className: 'tgc-stat__val', id: 'tgc-stat-highscore', html: '0'}
                         ]},
@@ -103,6 +107,7 @@ function(WindowBase, i18, core, tgcProfile, tgcAchievements, tgcCloud) {
         );
         var ptMin = Math.floor((d.stats.playTimeMs | 0) / 60000);
         $c.find('#tgc-stat-playtime').text(ptMin + ' min');
+        $c.find('#tgc-stat-totalscore').text(String(d.stats.totalScore | 0));
         var bestRun = Math.max(d.stats.bestSessionScore | 0, d.stats.highScore | 0);
         $c.find('#tgc-stat-highscore').text(String(bestRun));
         $c.find('#tgc-stat-deaths').text(String(d.stats.deaths | 0));

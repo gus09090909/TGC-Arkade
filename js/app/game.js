@@ -36,6 +36,8 @@ function(stage,
         this.options = options || _options;
         this.isGameStarted = false;
         this.isGameLoaded = false;
+        this._roundClearUiScheduled = false;
+        this._mobileLayoutRetryScheduled = false;
         this.episodeLevel = 0;
         tgcSession.setSessionActive(false);
         
@@ -70,6 +72,14 @@ function(stage,
         
         w.bind('resize', $.proxy(this.onWindowResize, this));
         w.bind('orientationchange', $.proxy(this.onWindowOrientationChange, this));
+        if ( window.visualViewport ) {
+            window.visualViewport.addEventListener('resize', $.proxy(this.onWindowResize, this), { passive: true });
+        }
+        w.on('pageshow', $.proxy(function(ev) {
+            if ( ev.originalEvent && ev.originalEvent.persisted ) {
+                this.onWindowResize();
+            }
+        }, this));
         
         if ( window === window.top && core.helperApp.platform() != 'wp8' ) {
             w.bind('focus', $.proxy(this.onWindowFocus, this));
@@ -136,6 +146,7 @@ function(stage,
      * @param {Number} level
      */
     Game.prototype.startNewGame = function(episode, level) {
+        this._roundClearUiScheduled = false;
         sound.resetSettings();
         $('#a-game-canvas').addClass('a-playing');
         this.clearStage();
@@ -160,6 +171,7 @@ function(stage,
         dashboard.getTime().start();
         sound.stopMusic();
         input.pointer.updateStageCoords();
+        this._enterPlayPresentation();
     };
     
     /**
@@ -167,6 +179,7 @@ function(stage,
      * @param {Number} level
      */
     Game.prototype.startLevelGame = function(level) {
+        this._roundClearUiScheduled = false;
         this.clearStage();
         levels.loadLevel(level).build();
         entities.balls.create();
@@ -186,6 +199,36 @@ function(stage,
         core.mediator.emit('game:level-start', levels.getCurrentLevelIndex() + 1);
         sound.stopMusic();
         input.pointer.updateStageCoords();
+        this._enterPlayPresentation();
+    };
+
+    /**
+     * Fullscreen + pointer lock on desktop while a level is active (user-gesture chain from Play).
+     */
+    Game.prototype._enterPlayPresentation = function() {
+        if ( this.options.splashscreen || this.options.customLevel || core.helperBrowser.isMobile ) {
+            return;
+        }
+        var shell = document.getElementById('a-container');
+        var canvas = document.getElementById('a-game-canvas');
+        var hf = core.helperFullscreen;
+        var tryLock = function() {
+            if ( hf.isPointerLockSupport() && canvas ) {
+                $.when(hf.requestPointerLock(canvas));
+            }
+        };
+        if ( hf.isSupport() && shell ) {
+            $.when(hf.request(shell)).always(tryLock);
+        } else {
+            tryLock();
+        }
+    };
+
+    Game.prototype._exitPlayPresentation = function() {
+        try {
+            core.helperFullscreen.exitPointerLock();
+            core.helperFullscreen.exit();
+        } catch (e) {}
     };
         
     /**
@@ -195,6 +238,7 @@ function(stage,
         if ( !this.isGameLoaded ) {
             return;
         }
+        this._exitPlayPresentation();
         $('#a-game-canvas').removeClass('a-playing');
         this.isGameStarted = false;
         dashboard.getTime().stop();
@@ -262,10 +306,13 @@ function(stage,
         if ( this.options.splashscreen ) {
             return;
         }
-        if ( !dashboard.getTime().timer ) {
+        if ( this._roundClearUiScheduled ) {
             return;
         }
-        dashboard.getTime().stop();
+        this._roundClearUiScheduled = true;
+        if ( dashboard.getTime().timer ) {
+            dashboard.getTime().stop();
+        }
         facade.clear().show(i18._('round-well-done'), {autohide: false});
         
         setTimeout(function() {
@@ -276,6 +323,7 @@ function(stage,
             if ( this.windowRoundWin.isOpened() ) {
                 return;
             }
+            this._exitPlayPresentation();
             var roundIdx = levels.getCurrentLevelIndex() + 1;
             var levZero = levels.getCurrentLevelIndex();
             var timeSec = dashboard.getTime().get();
@@ -285,7 +333,7 @@ function(stage,
             if ( !levels.isCustom() ) {
                 tgcProfile.flushPlayBuffer();
                 dashboard.getScore().commitLevelToSession();
-                tgcProfile.applyLevelWin(levZero, levelScore, timeSec, livesLeft, levels.getLevelsLength());
+                tgcProfile.applyLevelWin(levZero, levelScore, timeSec, livesLeft, levels.getLevelsLength(), scoreVal);
                 this._syncTgcAchievements();
             }
             this.windowRoundWin.open({
@@ -560,10 +608,16 @@ function(stage,
         }
         this.isGameLoaded = true;
         var layoutThis = this;
+        function runMobileLayout() {
+            layoutThis.applyMobileLayoutScale();
+            input.pointer.updateStageCoords();
+        }
         requestAnimationFrame(function() {
             requestAnimationFrame(function() {
-                layoutThis.applyMobileLayoutScale();
-                input.pointer.updateStageCoords();
+                runMobileLayout();
+                [120, 400, 1200].forEach(function(ms) {
+                    setTimeout(runMobileLayout, ms);
+                });
             });
         });
     };
@@ -616,6 +670,24 @@ function(stage,
     };
 
     /**
+     * Usable area in CSS px (Visual Viewport API when available — fixes iOS/Android URL bar).
+     */
+    Game.prototype._layoutViewportSize = function() {
+        var pad = 12;
+        var vv = window.visualViewport;
+        if ( vv && vv.width > 0 && vv.height > 0 ) {
+            return {
+                w: Math.max(0, vv.width - pad * 2),
+                h: Math.max(0, vv.height - pad * 2)
+            };
+        }
+        return {
+            w: Math.max(0, window.innerWidth - pad * 2),
+            h: Math.max(0, window.innerHeight - pad * 2)
+        };
+    };
+
+    /**
      * Space index: keep desktop-sized DOM (798px) and scale the whole block to fit the viewport
      * (“mini PC”). Uses a viewport wrapper so layout width/height match the scaled footprint.
      * @method applyMobileLayoutScale
@@ -623,9 +695,8 @@ function(stage,
     Game.prototype.applyMobileLayoutScale = function() {
         var body = $(document.body),
             isSpaceIndex = body.attr('id') === 'space' && body.hasClass('class-index-page'),
-            narrow = window.matchMedia ?
-                window.matchMedia('(max-width: 1080px)').matches :
-                (window.innerWidth <= 1080),
+            narrow = (window.innerWidth <= 1080) ||
+                (window.matchMedia && window.matchMedia('(max-width: 1080px)').matches),
             $wrap = $('#a-game-wrapper'),
             $vp;
 
@@ -681,10 +752,22 @@ function(stage,
 
         var natW = $wrap.outerWidth(),
             natH = $wrap.outerHeight(true),
-            pad = 12,
-            vw = Math.max(0, window.innerWidth - pad * 2),
-            vh = Math.max(0, window.innerHeight - pad * 2),
-            s = Math.min(vw / natW, vh / natH, 1);
+            vp = this._layoutViewportSize(),
+            vw = vp.w,
+            vh = vp.h,
+            s;
+
+        if ( (natW < 10 || natH < 10) && !this._mobileLayoutRetryScheduled ) {
+            this._mobileLayoutRetryScheduled = true;
+            var self = this;
+            setTimeout(function() {
+                self._mobileLayoutRetryScheduled = false;
+                self.applyMobileLayoutScale();
+            }, 150);
+            return;
+        }
+
+        s = Math.min(vw / natW, vh / natH, 1);
 
         if ( s < 0.08 || !isFinite(s) ) {
             s = 0.08;

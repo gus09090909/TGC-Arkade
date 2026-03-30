@@ -164,21 +164,36 @@ function(core) {
         }
     };
 
+    Pointer.prototype._pointerLockElement = function() {
+        var d = document;
+        return d.pointerLockElement || d.mozPointerLockElement || d.webkitPointerLockElement;
+    };
+
     Pointer.prototype.onPointerMove = function(event) {
         if ( this.preventDefault && event.cancelable ) {
             event.preventDefault();
         }
 
-        var clientX, clientY;
-        if ( event.originalEvent ) {
-            var p = this._getClientXY(event.originalEvent);
-            clientX = p.x;
-            clientY = p.y;
-        } else {
-            clientX = event.clientX;
-            clientY = event.clientY;
-        }
+        var e = event.originalEvent || event;
         this._syncCanvasRectViewport();
+
+        var canvasEl = this.canvasElement[0];
+        if ( canvasEl && this._pointerLockElement() === canvasEl ) {
+            var mx = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+            this.x += mx;
+            if ( this.x < 0 ) {
+                this.x = 0;
+            }
+            if ( this.x > this.canvasCoords.width ) {
+                this.x = this.canvasCoords.width;
+            }
+            return;
+        }
+
+        var clientX, clientY;
+        var p = this._getClientXY(e);
+        clientX = p.x;
+        clientY = p.y;
         this._applyPointerXY(clientX, clientY);
     };
 

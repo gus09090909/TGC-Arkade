@@ -174,6 +174,7 @@ function() {
         'tgc-toast-achievement-label': 'Achievement unlocked',
         'tgc-profile-header': 'Profile',
         'tgc-stat-playtime': 'Time played',
+        'tgc-stat-total-points': 'Total points (all levels)',
         'tgc-stat-highscore': 'High score',
         'tgc-stat-best-run': 'Best run (session)',
         'tgc-stat-unlock': 'Levels unlocked (max)',
